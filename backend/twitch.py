@@ -16,6 +16,7 @@ import aiohttp
 from yarl import URL
 
 from translate import _
+from gui import GUIManager
 from channel import Channel
 from websocket import WebsocketPool
 from inventory import DropsCampaign
@@ -45,7 +46,7 @@ from constants import (
     DUMP_PATH,
     COOKIES_PATH,
     MAX_CHANNELS,
-    GQL_QUERIES,
+    GQL_OPERATIONS,
     WATCH_INTERVAL,
     State,
     ClientType,
@@ -375,8 +376,7 @@ class _AuthState:
                 for invalid_token_attempt in range(2):
                     cookie = jar.filter_cookies(client_info.CLIENT_URL)
                     if "auth-token" not in cookie:
-                        logger.info("No auth cookie, starting login flow")
-                        self.access_token = await self._login()
+                        self.access_token = await self._oauth_login()
                         cookie["auth-token"] = self.access_token
                     elif not hasattr(self, "access_token"):
                         logger.info("Restoring session from cookie")
@@ -421,7 +421,7 @@ class _AuthState:
 
 
 class Twitch:
-    def __init__(self, settings: Settings, *, web_mode: bool = False):
+    def __init__(self, settings: Settings):
         self.settings: Settings = settings
         # State management
         self._state: State = State.IDLE
@@ -438,10 +438,8 @@ class Twitch:
         self._client_type: ClientInfo = ClientType.ANDROID_APP
         self._session: aiohttp.ClientSession | None = None
         self._auth_state: _AuthState = _AuthState(self)
-        # GUI - skip tkinter GUI in web mode
-        if not web_mode:
-            from gui import GUIManager
-            self.gui = GUIManager(self)
+        # GUI
+        self.gui = GUIManager(self)
         # Storing and watching channels
         self.channels: OrderedDict[int, Channel] = OrderedDict()
         self.watching_channel: AwaitableValue[Channel] = AwaitableValue()
@@ -633,7 +631,6 @@ class Twitch:
                 self.stop_watching()
                 # clear the flag and wait until it's set again
                 self._state_change.clear()
-                await self._state_change.wait()
             elif self._state is State.INVENTORY_FETCH:
                 self.gui.tray.change_icon("maint")
                 # ensure the websocket is running
@@ -843,39 +840,20 @@ class Twitch:
                     # selected channel is checked first, and set as long as we can watch it
                     new_watching = selected_channel
                 else:
-                    watching_channel = self.watching_channel.get_with_default(None)
-                    # If current channel is still valid and online, keep it
-                    if watching_channel is not None and self.can_watch(watching_channel) and watching_channel.online:
-                        new_watching = watching_channel
-                    else:
-                        # force-switch to the next best available channel (cycling through)
-                        sorted_channels = sorted(channels.values(), key=self.get_priority)
-                        if watching_channel is not None:
-                            # find the current channel index and pick the next one
-                            try:
-                                idx = next(i for i, ch in enumerate(sorted_channels) if ch.id == watching_channel.id)
-                                # try next channels in order, wrapping around
-                                for offset in range(1, len(sorted_channels)):
-                                    candidate = sorted_channels[(idx + offset) % len(sorted_channels)]
-                                    if self.can_watch(candidate):
-                                        new_watching = candidate
-                                        break
-                            except StopIteration:
-                                pass
-                        if new_watching is None:
-                            # fallback: pick the first watchable channel
-                            for channel in sorted_channels:
-                                if self.can_watch(channel):
-                                    new_watching = channel
-                                    break
+                    # other channels additionally need to have a good reason
+                    # for a switch (including the watching one)
+                    # NOTE: we need to sort the channels every time because one channel
+                    # can end up streaming any game - channels aren't game-tied
+                    for channel in sorted(channels.values(), key=self.get_priority):
+                        if self.should_switch(channel):
+                            new_watching = channel
+                            break
                 watching_channel = self.watching_channel.get_with_default(None)
                 if new_watching is not None:
                     # if we have a better switch target - do so
-                    self.print(f"Switching to {new_watching.name}")
                     self.watch(new_watching)
                     # break the state change chain by clearing the flag
                     self._state_change.clear()
-                    await self._state_change.wait()
                 elif watching_channel is not None and self.can_watch(watching_channel):
                     # otherwise, continue watching what we had before
                     self.gui.status.update(
@@ -883,7 +861,6 @@ class Twitch:
                     )
                     # break the state change chain by clearing the flag
                     self._state_change.clear()
-                    await self._state_change.wait()
                 else:
                     # not watching anything and there isn't anything to watch either
                     self.print(_("status", "no_channel"))
@@ -909,9 +886,7 @@ class Twitch:
             channel: Channel = await self.watching_channel.get()
             if not channel.online:
                 # if the channel isn't online anymore, we stop watching it
-                # and automatically switch to the next available channel
                 self.stop_watching()
-                self.change_state(State.CHANNEL_SWITCH)
                 continue
             # logger.log(CALL, f"Sending watch payload to: {channel.name}")
             succeeded: bool = await channel.send_watch()
@@ -931,7 +906,7 @@ class Twitch:
                 # Solution 1: use GQL to query for the currently mined drop status
                 try:
                     context = await self.gql_request(
-                        GQL_QUERIES["CurrentDrop"].with_variables(
+                        GQL_OPERATIONS["CurrentDrop"].with_variables(
                             {"channelID": str(channel.id)}
                         )
                     )
@@ -1018,7 +993,7 @@ class Twitch:
                     and channel.drops_enabled
                     and channel.game in self.wanted_games
                     # let the campaign ignore all channel-related checks
-                    or campaign.game.is_special()
+                    or campaign.game.is_special_events()
                 )
             ):
                 return True
@@ -1200,7 +1175,7 @@ class Twitch:
             if watching_channel is not None:
                 for attempt in range(8):
                     context = await self.gql_request(
-                        GQL_QUERIES["CurrentDrop"].with_variables(
+                        GQL_OPERATIONS["CurrentDrop"].with_variables(
                             {"channelID": str(watching_channel.id)}
                         )
                     )
@@ -1239,17 +1214,11 @@ class Twitch:
                 # badge confirmation?
             ):
                 self.change_state(State.INVENTORY_FETCH)
-                try:
-                    await self.gql_request(
-                        GQL_QUERIES["NotificationsDelete"].with_variables(
-                            {"input": {"id": data["id"]}}
-                        )
+                await self.gql_request(
+                    GQL_OPERATIONS["NotificationsDelete"].with_variables(
+                        {"input": {"id": data["id"]}}
                     )
-                except GQLException as e:
-                    if "notification not found" in str(e):
-                        pass
-                    else:
-                        raise
+                )
 
     async def get_auth(self) -> _AuthState:
         await self._auth_state.validate()
@@ -1418,7 +1387,7 @@ class Twitch:
         auth_state = await self.get_auth()
         response_list: list[JsonType] = await self.gql_request(
             [
-                GQL_QUERIES["CampaignDetails"].with_variables(
+                GQL_OPERATIONS["CampaignDetails"].with_variables(
                     {"channelLogin": str(auth_state.user_id), "dropID": cid}
                 )
                 for cid in campaign_ids
@@ -1434,7 +1403,7 @@ class Twitch:
         status_update = self.gui.status.update
         status_update(_("gui", "status", "fetching_inventory"))
         # fetch in-progress campaigns (inventory)
-        response = await self.gql_request(GQL_QUERIES["Inventory"])
+        response = await self.gql_request(GQL_OPERATIONS["Inventory"])
         inventory: JsonType = response["data"]["currentUser"]["inventory"]
         ongoing_campaigns: list[JsonType] = inventory["dropCampaignsInProgress"] or []
         # this contains claimed benefit edge IDs, not drop IDs
@@ -1443,7 +1412,7 @@ class Twitch:
         }
         inventory_data: dict[str, JsonType] = {c["id"]: c for c in ongoing_campaigns}
         # fetch general available campaigns data (campaigns)
-        response = await self.gql_request(GQL_QUERIES["Campaigns"])
+        response = await self.gql_request(GQL_OPERATIONS["Campaigns"])
         available_list: list[JsonType] = response["data"]["currentUser"]["dropCampaigns"] or []
         applicable_statuses = ("ACTIVE", "UPCOMING")
         available_campaigns: dict[str, JsonType] = {
@@ -1577,7 +1546,7 @@ class Twitch:
             filters.append("DROPS_ENABLED")
         try:
             response = await self.gql_request(
-                GQL_QUERIES["GameDirectory"].with_variables({
+                GQL_OPERATIONS["GameDirectory"].with_variables({
                     "limit": limit,
                     "slug": game.slug,
                     "options": {
@@ -1629,7 +1598,7 @@ class Twitch:
         acl_available_drops_map: dict[int, list[JsonType]] = {}
         if self.settings.available_drops_check:
             available_gql_ops: list[GQLOperation] = [
-                GQL_QUERIES["AvailableDrops"].with_variables({"channelID": str(channel_id)})
+                GQL_OPERATIONS["AvailableDrops"].with_variables({"channelID": str(channel_id)})
                 for channel_id, channel_data in acl_streams_map.items()
                 if channel_data["stream"] is not None  # only do this for ONLINE channels
             ]
