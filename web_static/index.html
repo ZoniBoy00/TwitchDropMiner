@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico?v=mqbgxpjp">
+    <link rel="icon" type="image/jpeg" href="/tdm-logo-v3.jpg?v=mqbgxpjp">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=mqbgxpjp">
+    <title>Twitch Drops Miner</title>
+    <script>
+      // Disable bfcache (Back-Forward Cache) for Opera GX, Chrome etc.
+      // beforeunload prevents Chromium from putting the page into bfcache,
+      // pageshow is a fallback if the page still gets restored from it.
+      window.addEventListener('beforeunload', function() {});
+      window.addEventListener('pageshow', function(e) {
+        if (e.persisted) window.location.reload();
+      });
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <script type="module" crossorigin src="/assets/index-BfAtw1yz.js?v=mqbgxpjp"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-CndDNB5f.css?v=mqbgxpjp">
+  </head>
+  <body class="bg-dark-900 text-dark-50 antialiased">
+    <div id="root"></div>
+  </body>
+</html>

@@ -1,38 +1,28 @@
-# Python
-__pycache__/
-*.py[cod]
-*.pyo
-*.egg-info/
-dist/
-build/
-*.egg
-
-# Node
-node_modules/
-frontend/node_modules/
-
-# User data (generated at runtime)
-backend/cookies.jar
-backend/settings.json
-backend/lock.file
-backend/log.txt
-backend/dump.dat
-backend/cache/
-
-# Build output (regenerated with npm run build)
-web_static/
-
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-
-# OS
+# Cache files
+__pycache__
+.mypy_cache
+# Build and dist files
+/build
+/dist
+/*.exe
+/*.zip
+/*.tmp
+/Twitch Drops Miner
+# Dev files
+*.new
+/env
+/cache
+/*.jar
+log.txt
+/dump.dat
+/lock.file
+settings.json
+/lang/English.json
+# AppImage
+/AppDir
+/appimage-builder
+/appimage-build
+/*.AppImage
+/*.AppImage.zsync
 .DS_Store
-Thumbs.db
-Desktop.ini
-
-# Logs
-*.log
+*.app
