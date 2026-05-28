@@ -1,0 +1,30 @@
+{
+  "name": "twitch-drop-miner",
+  "private": true,
+  "version": "2.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently -n backend,frontend -c blue,green \"python ../backend/server.py --port 1337\" \"vite\"",
+    "dev:frontend": "vite",
+    "dev:backend": "python ../backend/server.py --port 1337",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "start": "npm run build && cd .. && python backend/server.py --port 1337"
+  },
+  "dependencies": {
+    "lucide-react": "^0.468.0",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "autoprefixer": "^10.4.20",
+    "concurrently": "^9.1.0",
+    "postcss": "^8.4.49",
+    "tailwindcss": "^3.4.16",
+    "typescript": "^5.6.3",
+    "vite": "^6.0.3"
+  }
+}

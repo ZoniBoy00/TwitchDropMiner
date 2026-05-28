@@ -1,0 +1,71 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #2a2a3a; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #3a3a4a; }
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes slideIn { from { opacity: 0; transform: translateX(-12px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes pulse-soft { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+@keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+@keyframes glow { 0%, 100% { box-shadow: 0 0 8px rgba(108,92,231,0.3); } 50% { box-shadow: 0 0 16px rgba(108,92,231,0.5); } }
+@keyframes scale-in { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+@keyframes progress-stripe { 0% { background-position: 1rem 0; } 100% { background-position: 0 0; } }
+
+@layer components {
+  .card {
+    @apply bg-dark-700/80 border border-dark-600/50 rounded-xl p-4 backdrop-blur-sm;
+    animation: fadeIn 0.3s ease-out;
+    transition: all 0.2s ease;
+    overflow: visible;
+  }
+  .card:hover {
+    @apply border-dark-500/70 shadow-lg;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  }
+  .badge { @apply px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider; animation: scale-in 0.2s ease-out; }
+  .badge-green { @apply badge bg-success/15 text-success; }
+  .badge-yellow { @apply badge bg-warning/15 text-warning; }
+  .badge-red { @apply badge bg-danger/15 text-danger; }
+  .badge-blue { @apply badge bg-info/15 text-info; }
+  .badge-purple { @apply badge bg-accent/15 text-accent-light; }
+  .btn {
+    @apply px-3 py-1.5 rounded-lg text-xs font-semibold inline-flex items-center gap-1.5 cursor-pointer border-0;
+    transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn-primary { @apply btn bg-accent text-white hover:bg-accent-light; }
+  .btn-ghost { @apply btn bg-transparent text-dark-200 border border-dark-600 hover:bg-dark-600/50 hover:text-dark-50 hover:border-dark-500; }
+  .btn-success { @apply btn bg-success text-white hover:opacity-85; }
+  .btn-warning { @apply btn bg-warning text-dark-900 hover:opacity-85; }
+  .btn-danger { @apply btn bg-danger text-white hover:opacity-85; }
+  .input {
+    @apply w-full px-3 py-2 bg-dark-900/80 border border-dark-600/50 rounded-lg text-dark-50 text-xs outline-none;
+    transition: all 0.2s ease;
+  }
+  .input:focus { @apply border-accent; box-shadow: 0 0 0 2px rgba(108,92,231,0.2); }
+  .progress-track { @apply h-1.5 bg-dark-900/80 rounded-full overflow-hidden; }
+  .progress-fill {
+    @apply h-full rounded-full;
+    transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    background: linear-gradient(90deg, var(--tw-gradient-from, #6c5ce7), var(--tw-gradient-to, #a29bfe));
+  }
+  .stat-card {
+    @apply card relative overflow-hidden;
+  }
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--tw-gradient-from, #6c5ce7), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .stat-card:hover::before { opacity: 1; }
+}

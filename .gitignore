@@ -1,0 +1,38 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Node
+node_modules/
+frontend/node_modules/
+
+# User data (generated at runtime)
+backend/cookies.jar
+backend/settings.json
+backend/lock.file
+backend/log.txt
+backend/dump.dat
+backend/cache/
+
+# Build output (regenerated with npm run build)
+web_static/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Logs
+*.log
