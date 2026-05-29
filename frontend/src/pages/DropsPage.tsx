@@ -5,10 +5,10 @@ import type { Campaign, Game } from '../types';
 
 export function DropsPage({ campaigns, games }: { campaigns: Campaign[]; games: Record<string, Game> }) {
   return (
-    <div className="space-y-3">
+    <div className="space-y-3 overflow-y-auto max-h-full">
       {campaigns.length === 0 ? <div className="card text-center py-10 text-dark-400"><Gift size={32} className="mx-auto mb-2 opacity-30" /><p className="text-xs">No campaigns loaded yet</p></div> :
         campaigns.map((c, idx) => (
-          <div key={c.id} className="card" style={{ animationDelay: `${idx * 50}ms` }}>
+          <div key={c.id} className="card" style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 200px' }}>
             <div className="flex items-start justify-between mb-2">
               <div className="flex items-center gap-2.5">
                 <GameIcon games={games} name={c.game} />

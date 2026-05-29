@@ -129,6 +129,26 @@ class WebCampaignProgress:
         self._timer_task: asyncio.Task | None = None
         self._seconds: int = 0
 
+    def get_init_drop(self) -> dict:
+        """Return current drop data for the init message"""
+        d = self._drop
+        if d is None:
+            return {"active": False}
+        c = d.campaign
+        return {
+            "active": True,
+            "drop_name": d.name,
+            "rewards": d.rewards_text(),
+            "drop_progress": d.progress,
+            "drop_pct": f"{d.progress:.1%}",
+            "campaign_name": c.name,
+            "game_name": c.game.name,
+            "campaign_progress": c.progress,
+            "campaign_pct": f"{c.progress:.1%} ({c.claimed_drops}/{c.total_drops})",
+            "drop_rem": f"{d.remaining_minutes} min",
+            "camp_rem": f"{c.remaining_minutes} min",
+        }
+
     def _update_time(self, seconds: int | None = None):
         if seconds is not None:
             self._seconds = seconds
@@ -493,6 +513,7 @@ class WebGUIManager:
                 "uptime": str(datetime.now() - self._start_time).split(".")[0],
                 "login_status": self.login.status,
                 "login_user_id": self.login.user_id,
+                "drop": self.progress.get_init_drop(),
             }
             if self.login.waiting_for == "code" and self.login.pending_code:
                 init["login_action"] = "enter_code"

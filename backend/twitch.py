@@ -843,27 +843,31 @@ class Twitch:
                     # selected channel is checked first, and set as long as we can watch it
                     new_watching = selected_channel
                 else:
-                    # force-switch to the next best available channel (cycling through)
                     watching_channel = self.watching_channel.get_with_default(None)
-                    sorted_channels = sorted(channels.values(), key=self.get_priority)
-                    if watching_channel is not None:
-                        # find the current channel index and pick the next one
-                        try:
-                            idx = next(i for i, ch in enumerate(sorted_channels) if ch.id == watching_channel.id)
-                            # try next channels in order, wrapping around
-                            for offset in range(1, len(sorted_channels)):
-                                candidate = sorted_channels[(idx + offset) % len(sorted_channels)]
-                                if self.can_watch(candidate):
-                                    new_watching = candidate
+                    # If current channel is still valid and online, keep it
+                    if watching_channel is not None and self.can_watch(watching_channel) and watching_channel.online:
+                        new_watching = watching_channel
+                    else:
+                        # force-switch to the next best available channel (cycling through)
+                        sorted_channels = sorted(channels.values(), key=self.get_priority)
+                        if watching_channel is not None:
+                            # find the current channel index and pick the next one
+                            try:
+                                idx = next(i for i, ch in enumerate(sorted_channels) if ch.id == watching_channel.id)
+                                # try next channels in order, wrapping around
+                                for offset in range(1, len(sorted_channels)):
+                                    candidate = sorted_channels[(idx + offset) % len(sorted_channels)]
+                                    if self.can_watch(candidate):
+                                        new_watching = candidate
+                                        break
+                            except StopIteration:
+                                pass
+                        if new_watching is None:
+                            # fallback: pick the first watchable channel
+                            for channel in sorted_channels:
+                                if self.can_watch(channel):
+                                    new_watching = channel
                                     break
-                        except StopIteration:
-                            pass
-                    if new_watching is None:
-                        # fallback: pick the first watchable channel
-                        for channel in sorted_channels:
-                            if self.can_watch(channel):
-                                new_watching = channel
-                                break
                 watching_channel = self.watching_channel.get_with_default(None)
                 if new_watching is not None:
                     # if we have a better switch target - do so

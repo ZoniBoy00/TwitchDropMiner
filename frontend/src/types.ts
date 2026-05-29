@@ -28,7 +28,7 @@ export interface Settings {
 export type Page = 'dashboard' | 'channels' | 'drops' | 'settings' | 'logs' | 'faq';
 
 export type WsMessage =
-  | { type: 'init'; status: string; channels: Channel[]; tray: string; campaigns: Campaign[]; games: Record<string, Game>; ws_status: Record<string, WsStatusItem>; uptime: string; login_action?: string; login_code?: string; login_url?: string; login_status?: string; login_user_id?: number | null }
+  | { type: 'init'; status: string; channels: Channel[]; tray: string; campaigns: Campaign[]; games: Record<string, Game>; ws_status: Record<string, WsStatusItem>; uptime: string; drop?: { active: boolean; drop_name?: string; rewards?: string; drop_progress?: number; drop_pct?: string; campaign_name?: string; game_name?: string; campaign_progress?: number; campaign_pct?: string; drop_rem?: string; camp_rem?: string }; login_action?: string; login_code?: string; login_url?: string; login_status?: string; login_user_id?: number | null }
   | { type: 'status'; text: string }
   | { type: 'log'; message: string }
   | { type: 'channels'; channels: Channel[] }

@@ -60,6 +60,7 @@ export default function App() {
         if (msg.login_user_id !== undefined) setLoginUserId(msg.login_user_id);
         if (msg.uptime) { const p = msg.uptime.split(':').map(Number); serverStartRef.current = Date.now() - ((p[0] * 3600 + p[1] * 60 + p[2]) * 1000); }
         if (msg.login_action) { setLoginAction(msg.login_action); if (msg.login_code) setLoginCode(msg.login_code); if (msg.login_url) setLoginUrl(msg.login_url); }
+        if (msg.drop) setDrop(msg.drop);
         fetch('/api/settings').then(r => r.json()).then(setSettings).catch(() => {});
         break;
       case 'status': setStatus(msg.text); break;
@@ -124,8 +125,8 @@ export default function App() {
       <Sidebar page={page} setPage={setPage} wsConnected={connected} status={status} uptime={uptime} loginStatus={loginStatus} loginUserId={loginUserId} onLogout={handleLogout} />
       <div className="flex-1 flex flex-col overflow-hidden">
         <Topbar title={titles[page]} onReload={() => send({ action: 'reload' })} onSwitch={() => send({ action: 'switch' })} onRestart={() => send({ action: 'restart' })} />
-        <main className="flex-1 p-5">
-          <div className="overflow-y-auto h-full">
+        <main className="flex-1 p-5 min-h-0">
+          <div className="overflow-y-auto h-full min-h-0">
             {page === 'dashboard' && <Dashboard status={status} channels={channels} campaigns={campaigns} wsStatus={wsStatus} uptime={uptime} drop={drop as any} games={games} />}
             {page === 'channels' && <ChannelsPage channels={channels} />}
             {page === 'drops' && <DropsPage campaigns={campaigns} games={games} />}
