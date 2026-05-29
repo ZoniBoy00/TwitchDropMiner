@@ -10,8 +10,8 @@ export function Dashboard({ status, channels, campaigns, wsStatus, uptime, drop 
 }) {
   const watching = channels.find(c => c.watching);
   return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-4 gap-4">
+    <div className="space-y-3 md:space-y-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
         {[
           { icon: <Zap size={18} className="text-accent" />, label: 'Status', value: status || 'Idle', tip: 'Current miner state (Idle, Watching, Fetching, etc.)', gradient: 'from-accent/20 to-transparent' },
           { icon: <Tv size={18} className="text-info" />, label: 'Channels', value: String(channels.length), tip: 'Number of channels currently being tracked', gradient: 'from-info/20 to-transparent' },
@@ -30,7 +30,7 @@ export function Dashboard({ status, channels, campaigns, wsStatus, uptime, drop 
           </div>
         ))}
       </div>
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
         <div className="card">
           <div className="flex items-center gap-2 mb-3"><Circle size={8} className="text-accent fill-accent" /><h3 className="text-xs font-semibold">Current Drop</h3></div>
           <div className="font-semibold text-sm">{drop.active ? drop.drop_name : '-'}</div>
@@ -55,7 +55,7 @@ export function Dashboard({ status, channels, campaigns, wsStatus, uptime, drop 
           <div className="flex items-center gap-2"><Wifi size={14} className="text-warning" /><h3 className="text-xs font-semibold">WebSocket Connections</h3></div>
           <span className="text-[10px] text-dark-300 bg-dark-600/50 px-2 py-0.5 rounded-full">{Object.values(wsStatus).filter(w => w.status === 'Connected').length}/8 active</span>
         </div>
-        <div className="grid grid-cols-4 gap-2">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
           {Array.from({ length: 8 }, (_, i) => {
             const w = wsStatus[i] || { status: 'Disconnected', topics: 0 };
             const active = w.status === 'Connected';

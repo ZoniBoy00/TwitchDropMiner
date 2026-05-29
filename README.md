@@ -26,6 +26,7 @@ AFK mine timed Twitch drops without watching streams. Saves bandwidth by only fe
 - **REST API** — Integrate with other systems
 - **21 languages** — Full translation support
 - **Tooltips** — Contextual help on all settings
+- **Responsive mobile UI** — Hamburger menu, drawer sidebar, optimized for phones
 
 ## Quick Start
 

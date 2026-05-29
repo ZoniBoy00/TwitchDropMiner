@@ -1,8 +1,12 @@
-import { LayoutDashboard, Tv, Gift, Settings, ScrollText, HelpCircle, LogOut, UserCheck, UserX } from 'lucide-react';
+import { LayoutDashboard, Tv, Gift, Settings, ScrollText, HelpCircle, LogOut, UserCheck, UserX, X } from 'lucide-react';
 import { StatusDot } from '../components/StatusDot';
 import type { Page } from '../types';
 
-export function Sidebar({ page, setPage, wsConnected, status, uptime, loginStatus, loginUserId, onLogout }: { page: Page; setPage: (p: Page) => void; wsConnected: boolean; status: string; uptime: string; loginStatus: string; loginUserId: number | null; onLogout: () => void }) {
+export function Sidebar({ page, setPage, wsConnected, status, uptime, loginStatus, loginUserId, onLogout, isOpen, onClose }: {
+  page: Page; setPage: (p: Page) => void; wsConnected: boolean; status: string; uptime: string;
+  loginStatus: string; loginUserId: number | null; onLogout: () => void;
+  isOpen: boolean; onClose: () => void;
+}) {
   const nav: { id: Page; icon: React.ReactNode; label: string }[] = [
     { id: 'dashboard', icon: <LayoutDashboard size={16} />, label: 'Dashboard' },
     { id: 'channels', icon: <Tv size={16} />, label: 'Channels' },
@@ -12,9 +16,10 @@ export function Sidebar({ page, setPage, wsConnected, status, uptime, loginStatu
     { id: 'faq', icon: <HelpCircle size={16} />, label: 'FAQ' },
   ];
   const isLoggedIn = loginStatus === 'Logged in' || loginStatus === 'Logged in (cached)';
-  return (
-    <aside className="w-56 bg-dark-800/90 backdrop-blur-md border-r border-dark-600/50 flex flex-col shrink-0">
-      <div className="p-4 border-b border-dark-600/50 text-center">
+
+  const sidebarContent = (
+    <div className="flex flex-col w-full h-full bg-dark-800/90 backdrop-blur-md border-r border-dark-600/50">
+      <div className="p-4 border-b border-dark-600/50 flex items-center justify-between">
         <div className="inline-flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-accent to-accent-light flex items-center justify-center">
             <span className="text-white text-sm font-bold">TD</span>
@@ -24,10 +29,13 @@ export function Sidebar({ page, setPage, wsConnected, status, uptime, loginStatu
             <p className="text-[9px] text-dark-300 tracking-widest uppercase">Miner</p>
           </div>
         </div>
+        <button onClick={onClose} className="md:hidden p-1 rounded hover:bg-dark-600/50 text-dark-400 hover:text-dark-50 transition-colors">
+          <X size={18} />
+        </button>
       </div>
       <nav className="flex-1 p-2 space-y-0.5">
         {nav.map((n, i) => (
-          <button key={n.id} onClick={() => setPage(n.id)}
+          <button key={n.id} onClick={() => { setPage(n.id); onClose(); }}
             className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-[13px] font-medium transition-all duration-200 ${
               page === n.id
                 ? 'bg-accent/15 text-accent-light border border-accent/30'
@@ -38,7 +46,6 @@ export function Sidebar({ page, setPage, wsConnected, status, uptime, loginStatu
           </button>
         ))}
       </nav>
-      {/* Login Status */}
       <div className="px-3 pb-1">
         <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-dark-700/30 border border-dark-600/30">
           {isLoggedIn ? <UserCheck size={14} className="text-green-400 shrink-0" /> : <UserX size={14} className="text-red-400 shrink-0" />}
@@ -63,6 +70,27 @@ export function Sidebar({ page, setPage, wsConnected, status, uptime, loginStatu
         </div>
         <div className="text-[10px] text-dark-400 mt-1 font-mono tracking-wider">{uptime}</div>
       </div>
-    </aside>
+    </div>
+  );
+
+  return (
+    <>
+      {/* Desktop sidebar - always visible */}
+      <aside className="hidden md:flex w-56 shrink-0">
+        {sidebarContent}
+      </aside>
+      {/* Mobile overlay */}
+      {isOpen && (
+        <div className="fixed inset-0 z-40 md:hidden" onClick={onClose}>
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+        </div>
+      )}
+      {/* Mobile drawer */}
+      <aside className={`fixed top-0 left-0 z-50 h-full w-64 transform transition-transform duration-300 ease-in-out md:hidden ${
+        isOpen ? 'translate-x-0' : '-translate-x-full'
+      }`}>
+        {sidebarContent}
+      </aside>
+    </>
   );
 }

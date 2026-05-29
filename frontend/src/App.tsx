@@ -36,6 +36,7 @@ export default function App() {
   const [loginStatus, setLoginStatus] = useState('Logged out');
   const [loginUserId, setLoginUserId] = useState<number | null>(null);
   const [drop, setDrop] = useState<{ active: boolean }>({ active: false });
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const serverStartRef = useRef(Date.now());
   const toastIdRef = useRef(0);
 
@@ -122,10 +123,10 @@ export default function App() {
 
   return (
     <div className="flex h-screen overflow-hidden">
-      <Sidebar page={page} setPage={setPage} wsConnected={connected} status={status} uptime={uptime} loginStatus={loginStatus} loginUserId={loginUserId} onLogout={handleLogout} />
+      <Sidebar page={page} setPage={setPage} wsConnected={connected} status={status} uptime={uptime} loginStatus={loginStatus} loginUserId={loginUserId} onLogout={handleLogout} isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       <div className="flex-1 flex flex-col overflow-hidden">
-        <Topbar title={titles[page]} onReload={() => send({ action: 'reload' })} onSwitch={() => send({ action: 'switch' })} onRestart={() => send({ action: 'restart' })} />
-        <main className="flex-1 p-5 min-h-0">
+        <Topbar title={titles[page]} onReload={() => send({ action: 'reload' })} onSwitch={() => send({ action: 'switch' })} onRestart={() => send({ action: 'restart' })} onMenuToggle={() => setSidebarOpen(o => !o)} />
+        <main className="flex-1 p-3 md:p-5 min-h-0">
           <div className="overflow-y-auto h-full min-h-0">
             {page === 'dashboard' && <Dashboard status={status} channels={channels} campaigns={campaigns} wsStatus={wsStatus} uptime={uptime} drop={drop as any} games={games} />}
             {page === 'channels' && <ChannelsPage channels={channels} />}
