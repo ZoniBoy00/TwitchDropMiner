@@ -1,8 +1,9 @@
 # Twitch Drops Miner
 
 [![Python](https://img.shields.io/badge/Python-3.10+-3776AB?logo=python&logoColor=white)](https://python.org)
-[![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=black)](https://react.dev)
+[![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)](https://react.dev)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)](https://typescriptlang.org)
+[![Tailwind](https://img.shields.io/badge/Tailwind_CSS-3-06B6D4?logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 AFK mine timed Twitch drops without watching streams. Saves bandwidth by only fetching stream metadata.
@@ -95,9 +96,27 @@ TwitchDropsMiner/
 │   └── lang/                  # 21 language files
 ├── frontend/                   # React TypeScript
 │   ├── src/
-│   │   ├── App.tsx            # All UI components
+│   │   ├── components/        # Reusable UI components
+│   │   │   ├── GameIcon.tsx
+│   │   │   ├── LoginOverlay.tsx
+│   │   │   ├── ProgressBar.tsx
+│   │   │   ├── StatusDot.tsx
+│   │   │   ├── Tip.tsx
+│   │   │   └── Toast.tsx
+│   │   ├── layout/            # Layout components
+│   │   │   ├── Sidebar.tsx
+│   │   │   └── Topbar.tsx
+│   │   ├── pages/             # Page components
+│   │   │   ├── ChannelsPage.tsx
+│   │   │   ├── Dashboard.tsx
+│   │   │   ├── DropsPage.tsx
+│   │   │   ├── LogsPage.tsx
+│   │   │   └── SettingsPage.tsx
+│   │   ├── hooks/
+│   │   │   └── useWebSocket.ts # WebSocket hook
+│   │   ├── App.tsx            # Root component with state management
 │   │   ├── types.ts           # TypeScript types
-│   │   ├── useWebSocket.ts    # WebSocket hook
+│   │   ├── main.tsx           # Entry point
 │   │   └── index.css          # Tailwind styles
 │   ├── public/favicon.ico     # Twitch favicon
 │   ├── package.json
@@ -138,10 +157,11 @@ TwitchDropsMiner/
 | Component | Technology |
 |-----------|------------|
 | Backend | Python 3.10+ / aiohttp |
-| Frontend | React 18 / TypeScript |
+| Frontend | React 19 / TypeScript |
 | Build | Vite 6 |
 | Styles | Tailwind CSS 3 |
 | Icons | Lucide React |
+| Architecture | Modular components with inline game dropdowns |
 
 ## REST API
 
