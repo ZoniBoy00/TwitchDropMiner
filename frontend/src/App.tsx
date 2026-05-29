@@ -10,6 +10,7 @@ import { ChannelsPage } from './pages/ChannelsPage';
 import { DropsPage } from './pages/DropsPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { LogsPage } from './pages/LogsPage';
+import { FAQPage } from './pages/FAQPage';
 
 // Layout
 import { Sidebar } from './layout/Sidebar';
@@ -32,6 +33,8 @@ export default function App() {
   const [loginCode, setLoginCode] = useState('');
   const [loginUrl, setLoginUrl] = useState('');
   const [loginError, setLoginError] = useState('');
+  const [loginStatus, setLoginStatus] = useState('Logged out');
+  const [loginUserId, setLoginUserId] = useState<number | null>(null);
   const [drop, setDrop] = useState<{ active: boolean }>({ active: false });
   const serverStartRef = useRef(Date.now());
   const toastIdRef = useRef(0);
@@ -53,6 +56,8 @@ export default function App() {
         setCampaigns(msg.campaigns);
         setWsStatus(msg.ws_status);
         setGames(msg.games);
+        if (msg.login_status) setLoginStatus(msg.login_status);
+        if (msg.login_user_id !== undefined) setLoginUserId(msg.login_user_id);
         if (msg.uptime) { const p = msg.uptime.split(':').map(Number); serverStartRef.current = Date.now() - ((p[0] * 3600 + p[1] * 60 + p[2]) * 1000); }
         if (msg.login_action) { setLoginAction(msg.login_action); if (msg.login_code) setLoginCode(msg.login_code); if (msg.login_url) setLoginUrl(msg.login_url); }
         fetch('/api/settings').then(r => r.json()).then(setSettings).catch(() => {});
@@ -68,10 +73,15 @@ export default function App() {
       case 'login':
         if (msg.action) { setLoginAction(msg.action); if (msg.code) setLoginCode(msg.code); if (msg.url) setLoginUrl(msg.url); }
         if (msg.error) setLoginError(msg.error);
+        if (msg.status) setLoginStatus(msg.status);
+        if (msg.user_id !== undefined) setLoginUserId(msg.user_id);
         if (msg.status && msg.user_id) setLoginAction(null);
         break;
       case 'toast': addToast(msg.message, msg.style); break;
-      case 'settings_saved': addToast('Settings saved', 'success'); break;
+      case 'settings_saved': 
+        addToast('Settings saved', 'success'); 
+        fetch('/api/settings').then(r => r.json()).then(setSettings).catch(() => {});
+        break;
     }
   }, [addToast]);
 
@@ -96,11 +106,22 @@ export default function App() {
     return () => clearInterval(t);
   }, []);
 
-  const titles: Record<Page, string> = { dashboard: 'Dashboard', channels: 'Channels', drops: 'Drops Inventory', settings: 'Settings', logs: 'Logs' };
+  const titles: Record<Page, string> = { dashboard: 'Dashboard', channels: 'Channels', drops: 'Drops Inventory', settings: 'Settings', logs: 'Logs', faq: 'FAQ' };
+
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/logout', { method: 'POST' });
+      setLoginStatus('Logged out');
+      setLoginUserId(null);
+      addToast('Logged out', 'success');
+    } catch (e) {
+      addToast('Logout failed', 'error');
+    }
+  };
 
   return (
     <div className="flex h-screen overflow-hidden">
-      <Sidebar page={page} setPage={setPage} wsConnected={connected} status={status} uptime={uptime} />
+      <Sidebar page={page} setPage={setPage} wsConnected={connected} status={status} uptime={uptime} loginStatus={loginStatus} loginUserId={loginUserId} onLogout={handleLogout} />
       <div className="flex-1 flex flex-col overflow-hidden">
         <Topbar title={titles[page]} onReload={() => send({ action: 'reload' })} onSwitch={() => send({ action: 'switch' })} onRestart={() => send({ action: 'restart' })} />
         <main className="flex-1 p-5">
@@ -110,6 +131,7 @@ export default function App() {
             {page === 'drops' && <DropsPage campaigns={campaigns} games={games} />}
             {page === 'settings' && <SettingsPage settings={settings} games={games} onSave={(d) => send({ action: 'save_settings', ...d as unknown as Record<string, unknown> })} />}
             {page === 'logs' && <LogsPage logs={logs} onClear={() => setLogs([])} />}
+            {page === 'faq' && <FAQPage />}
           </div>
         </main>
       </div>

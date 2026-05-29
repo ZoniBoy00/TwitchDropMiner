@@ -375,7 +375,8 @@ class _AuthState:
                 for invalid_token_attempt in range(2):
                     cookie = jar.filter_cookies(client_info.CLIENT_URL)
                     if "auth-token" not in cookie:
-                        self.access_token = await self._oauth_login()
+                        logger.info("No auth cookie, starting login flow")
+                        self.access_token = await self._login()
                         cookie["auth-token"] = self.access_token
                     elif not hasattr(self, "access_token"):
                         logger.info("Restoring session from cookie")
@@ -632,6 +633,7 @@ class Twitch:
                 self.stop_watching()
                 # clear the flag and wait until it's set again
                 self._state_change.clear()
+                await self._state_change.wait()
             elif self._state is State.INVENTORY_FETCH:
                 self.gui.tray.change_icon("maint")
                 # ensure the websocket is running
@@ -841,20 +843,35 @@ class Twitch:
                     # selected channel is checked first, and set as long as we can watch it
                     new_watching = selected_channel
                 else:
-                    # other channels additionally need to have a good reason
-                    # for a switch (including the watching one)
-                    # NOTE: we need to sort the channels every time because one channel
-                    # can end up streaming any game - channels aren't game-tied
-                    for channel in sorted(channels.values(), key=self.get_priority):
-                        if self.should_switch(channel):
-                            new_watching = channel
-                            break
+                    # force-switch to the next best available channel (cycling through)
+                    watching_channel = self.watching_channel.get_with_default(None)
+                    sorted_channels = sorted(channels.values(), key=self.get_priority)
+                    if watching_channel is not None:
+                        # find the current channel index and pick the next one
+                        try:
+                            idx = next(i for i, ch in enumerate(sorted_channels) if ch.id == watching_channel.id)
+                            # try next channels in order, wrapping around
+                            for offset in range(1, len(sorted_channels)):
+                                candidate = sorted_channels[(idx + offset) % len(sorted_channels)]
+                                if self.can_watch(candidate):
+                                    new_watching = candidate
+                                    break
+                        except StopIteration:
+                            pass
+                    if new_watching is None:
+                        # fallback: pick the first watchable channel
+                        for channel in sorted_channels:
+                            if self.can_watch(channel):
+                                new_watching = channel
+                                break
                 watching_channel = self.watching_channel.get_with_default(None)
                 if new_watching is not None:
                     # if we have a better switch target - do so
+                    self.print(f"Switching to {new_watching.name}")
                     self.watch(new_watching)
                     # break the state change chain by clearing the flag
                     self._state_change.clear()
+                    await self._state_change.wait()
                 elif watching_channel is not None and self.can_watch(watching_channel):
                     # otherwise, continue watching what we had before
                     self.gui.status.update(
@@ -862,6 +879,7 @@ class Twitch:
                     )
                     # break the state change chain by clearing the flag
                     self._state_change.clear()
+                    await self._state_change.wait()
                 else:
                     # not watching anything and there isn't anything to watch either
                     self.print(_("status", "no_channel"))
@@ -887,7 +905,9 @@ class Twitch:
             channel: Channel = await self.watching_channel.get()
             if not channel.online:
                 # if the channel isn't online anymore, we stop watching it
+                # and automatically switch to the next available channel
                 self.stop_watching()
+                self.change_state(State.CHANNEL_SWITCH)
                 continue
             # logger.log(CALL, f"Sending watch payload to: {channel.name}")
             succeeded: bool = await channel.send_watch()

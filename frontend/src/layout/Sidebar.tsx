@@ -1,15 +1,17 @@
-import { LayoutDashboard, Tv, Gift, Settings, ScrollText } from 'lucide-react';
+import { LayoutDashboard, Tv, Gift, Settings, ScrollText, HelpCircle, LogOut, UserCheck, UserX } from 'lucide-react';
 import { StatusDot } from '../components/StatusDot';
 import type { Page } from '../types';
 
-export function Sidebar({ page, setPage, wsConnected, status, uptime }: { page: Page; setPage: (p: Page) => void; wsConnected: boolean; status: string; uptime: string }) {
+export function Sidebar({ page, setPage, wsConnected, status, uptime, loginStatus, loginUserId, onLogout }: { page: Page; setPage: (p: Page) => void; wsConnected: boolean; status: string; uptime: string; loginStatus: string; loginUserId: number | null; onLogout: () => void }) {
   const nav: { id: Page; icon: React.ReactNode; label: string }[] = [
     { id: 'dashboard', icon: <LayoutDashboard size={16} />, label: 'Dashboard' },
     { id: 'channels', icon: <Tv size={16} />, label: 'Channels' },
     { id: 'drops', icon: <Gift size={16} />, label: 'Drops' },
     { id: 'settings', icon: <Settings size={16} />, label: 'Settings' },
     { id: 'logs', icon: <ScrollText size={16} />, label: 'Logs' },
+    { id: 'faq', icon: <HelpCircle size={16} />, label: 'FAQ' },
   ];
+  const isLoggedIn = loginStatus === 'Logged in' || loginStatus === 'Logged in (cached)';
   return (
     <aside className="w-56 bg-dark-800/90 backdrop-blur-md border-r border-dark-600/50 flex flex-col shrink-0">
       <div className="p-4 border-b border-dark-600/50 text-center">
@@ -36,6 +38,24 @@ export function Sidebar({ page, setPage, wsConnected, status, uptime }: { page: 
           </button>
         ))}
       </nav>
+      {/* Login Status */}
+      <div className="px-3 pb-1">
+        <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-dark-700/30 border border-dark-600/30">
+          {isLoggedIn ? <UserCheck size={14} className="text-green-400 shrink-0" /> : <UserX size={14} className="text-red-400 shrink-0" />}
+          <div className="flex-1 min-w-0">
+            <div className={`text-[11px] font-medium truncate ${isLoggedIn ? 'text-green-400' : 'text-red-400'}`}>
+              {loginStatus}
+            </div>
+            {loginUserId && <div className="text-[9px] text-dark-400 font-mono truncate">ID: {loginUserId}</div>}
+          </div>
+          {isLoggedIn && (
+            <button onClick={onLogout} title="Logout from Twitch"
+              className="p-1 rounded hover:bg-dark-600/50 text-dark-400 hover:text-red-400 transition-colors">
+              <LogOut size={12} />
+            </button>
+          )}
+        </div>
+      </div>
       <div className="p-3 border-t border-dark-600/50">
         <div className="flex items-center gap-2">
           <StatusDot status={wsConnected ? 'Connected' : 'Disconnected'} />

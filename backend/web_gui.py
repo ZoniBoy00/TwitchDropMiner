@@ -410,6 +410,8 @@ class WebGUIManager:
         r.add_post("/api/settings", self._api_set_settings)
         r.add_post("/api/login", self._api_login)
         r.add_post("/api/code", self._api_code)
+        r.add_post("/api/logout", self._api_logout)
+        r.add_get("/api/logout", self._api_logout)
         r.add_post("/api/restart", self._api_restart)
         r.add_post("/api/action/{action}", self._api_action)
         # Serve React build - check both local and parent directory
@@ -464,7 +466,7 @@ class WebGUIManager:
         if self._static_dir:
             index_path = os.path.join(self._static_dir, "index.html")
             if os.path.exists(index_path):
-                return web.FileResponse(index_path)
+                return web.FileResponse(index_path, headers={"Cache-Control": "no-cache, no-store, must-revalidate", "Pragma": "no-cache", "Expires": "0"})
         return web.Response(text="<h1>Build not found</h1><p>Run 'npm run build' in frontend/</p>", content_type="text/html")
 
     async def _favicon(self, request):
@@ -489,6 +491,8 @@ class WebGUIManager:
                 "games": self._games,
                 "ws_status": self.websockets._items,
                 "uptime": str(datetime.now() - self._start_time).split(".")[0],
+                "login_status": self.login.status,
+                "login_user_id": self.login.user_id,
             }
             if self.login.waiting_for == "code" and self.login.pending_code:
                 init["login_action"] = "enter_code"
@@ -533,6 +537,16 @@ class WebGUIManager:
         elif a == "save_settings":
             self.print("Settings saved via web UI")
             self._apply_settings(data)
+        elif a == "logout":
+            self.print("Logout requested via web UI")
+            self._twitch._auth_state.clear()
+            self.login.update("Logged out", None)
+            from constants import COOKIES_PATH
+            if COOKIES_PATH.exists():
+                COOKIES_PATH.unlink()
+            self._send({"type": "login", "status": "Logged out", "user_id": None})
+            self._send({"type": "toast", "message": "Logged out", "style": "success"})
+            self._twitch.change_state(State.INVENTORY_FETCH)
 
     def _apply_settings(self, data: dict):
         s = self._twitch.settings
@@ -563,7 +577,10 @@ class WebGUIManager:
         if "exclude" in data:
             s.exclude = set(data["exclude"])
         s.save(force=True)
+        self._send({"type": "settings_saved"})
         self._send({"type": "toast", "message": "Settings saved", "style": "success"})
+        # Also update the games set in case it changed
+        self._send({"type": "games_update", "games": self._games})
 
     # --- REST API ---
     async def _api_status(self, request):
@@ -602,6 +619,32 @@ class WebGUIManager:
     async def _api_code(self, request):
         self.login.confirm_code()
         return web.json_response({"ok": True})
+
+    async def _api_logout(self, request):
+        self.print("Logout requested via API - restarting server")
+        try:
+            self._twitch._auth_state.clear()
+        except Exception:
+            pass
+        self.login.update("Logged out", None)
+        self.login._login_event.set()
+        self.login._code_event.set()
+        self.login.waiting_for = None
+        from constants import COOKIES_PATH
+        if COOKIES_PATH.exists():
+            COOKIES_PATH.unlink()
+        self._send({"type": "login", "status": "Logged out", "user_id": None})
+        # Send toast and restart to clear all state
+        self._send({"type": "toast", "message": "Logged out - restarting server...", "style": "warning"})
+        # Give time for response to be sent, then restart process
+        asyncio.ensure_future(self._do_logout_restart())
+        return web.json_response({"ok": True})
+
+    async def _do_logout_restart(self):
+        await asyncio.sleep(0.5)
+        python = sys.executable
+        args_list = [python] + sys.argv
+        os.execv(python, args_list)
 
     async def _api_restart(self, request):
         self._send({"type": "toast", "message": "Restarting server...", "style": "warning"})
