@@ -155,6 +155,29 @@ TwitchDropMiner/
 | **Logs** | Real-time filtered logs with timestamps and search |
 | **FAQ** | Built-in troubleshooting guide and common questions |
 
+<details>
+<summary><b>🖼️ Screenshots</b> (click to expand)</summary>
+
+![Dashboard](Screenshots/Dashboard.png)
+*Dashboard — status cards, current drop, campaign progress, watching channel, WebSocket connections*
+
+![Channels](Screenshots/Channels.png)
+*Channels — live channel table with status, game, drops, viewers and ACL*
+
+![Drops](Screenshots/Drops.png)
+*Drops — campaign inventory with game icons, progress bars, drop status*
+
+![Settings](Screenshots/Settings.png)
+*Settings — proxy, language, priority/exclude lists, login status, connection quality*
+
+![Logs](Screenshots/Logs.png)
+*Logs — real-time filtered logs with timestamps, search and auto-scroll*
+
+![FAQ](Screenshots/FAQ.png)
+*FAQ — built-in troubleshooting guide with expandable questions*
+
+</details>
+
 ## Recent Improvements
 
 ### Auto Channel Switching
