@@ -57,6 +57,7 @@ export default function App() {
         setCampaigns(msg.campaigns);
         setWsStatus(msg.ws_status);
         setGames(msg.games);
+        if (msg.logs) setLogs(msg.logs);
         if (msg.login_status) setLoginStatus(msg.login_status);
         if (msg.login_user_id !== undefined) setLoginUserId(msg.login_user_id);
         if (msg.uptime) { const p = msg.uptime.split(':').map(Number); serverStartRef.current = Date.now() - ((p[0] * 3600 + p[1] * 60 + p[2]) * 1000); }

@@ -349,6 +349,8 @@ class WebGUIManager:
         self.output = self
         self._game_names: set[str] = set()
         self._games: dict[str, dict] = {}
+        # Log history: persist last 500 lines, send on WS init so they survive page refresh
+        self._log_history: list[str] = []
 
     # --- Properties required by Twitch ---
     @property
@@ -414,7 +416,11 @@ class WebGUIManager:
 
     def print(self, message: str):
         stamp = datetime.now().strftime("%H:%M:%S")
-        self._send({"type": "log", "message": f"{stamp}: {message}"})
+        formatted = f"{stamp}: {message}"
+        self._log_history.append(formatted)
+        if len(self._log_history) > 500:
+            self._log_history = self._log_history[-500:]
+        self._send({"type": "log", "message": formatted})
 
     def unfocus(self, event=None):
         pass
@@ -521,6 +527,7 @@ class WebGUIManager:
                 init["login_url"] = self.login.pending_url
             elif self.login.waiting_for == "login":
                 init["login_action"] = "request_login"
+            init["logs"] = self._log_history[-100:]  # lähetä viimeiset 100 logia uudelle clientille
             await ws.send_str(_json(init))
             async for msg in ws:
                 if msg.type == web.WSMsgType.TEXT:
