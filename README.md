@@ -24,6 +24,8 @@ AFK mine timed Twitch drops without watching streams. Saves bandwidth by only fe
 - **Web dashboard** — Modern React UI with real-time updates
 - **Built-in FAQ page** — Troubleshooting and help directly in the UI
 - **REST API** — Integrate with other systems
+- **API Key authentication** — Protect the REST API with a configurable key
+- **Rate limiting** — 30 requests/minute/IP to prevent abuse
 - **21 languages** — Full translation support
 - **Tooltips** — Contextual help on all settings
 - **Responsive mobile UI** — Hamburger menu, drawer sidebar, optimized for phones
@@ -152,7 +154,7 @@ TwitchDropMiner/
 | **Dashboard** | Status cards, drop/campaign progress, watching channel, 8 WebSocket connections |
 | **Channels** | Channel table with status, game, drops, viewers, ACL |
 | **Drops** | Campaign inventory with game boxart icons, progress bars |
-| **Settings** | Proxy, language, priority mode, connection quality, priority/exclude lists, login status |
+| **Settings** | Proxy, language, priority mode, connection quality, API key, priority/exclude lists, login status |
 | **Logs** | Real-time filtered logs with timestamps and search |
 | **FAQ** | Built-in troubleshooting guide and common questions |
 
@@ -199,7 +201,15 @@ A dedicated FAQ page is now part of the Web UI — no need to check the README f
 ### Login Status in Init
 Login status and user ID are now included in the initial WebSocket message, so the UI shows the correct state immediately on page load.
 
+### API Key Authentication
+A configurable API key can be set in Settings to protect all `/api/*` endpoints. When enabled, every API request must include the `X-API-Key` header. The key is stored in `settings.json` and can be changed at any time from the Web UI.
+
+### Rate Limiting
+All API endpoints are rate-limited to 30 requests per minute per IP to prevent abuse. Excessive requests return `429 Too Many Requests` with a `Retry-After` header.
+
 ## REST API
+
+> **Note:** All `/api/*` endpoints require the `X-API-Key` header if an API key is configured in Settings. Requests without a valid key return `401 Unauthorized`. Rate limiting (30 req/min/IP) applies to all `/api/*` routes.
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
@@ -214,12 +224,12 @@ Login status and user ID are now included in the initial WebSocket message, so t
 | POST | `/api/restart` | Restart server |
 | POST | `/api/action/reload` | Reload inventory |
 | POST | `/api/action/switch` | Switch channel |
-
+|
 ## WebSocket Messages
 
 **Server to Client:**
 ```json
-{"type": "init", "status": "Idle", "channels": [], "campaigns": [], "games": {}, "uptime": "00:05:30", "login_status": "Logged out", "login_user_id": null}
+{"type": "init", "status": "Idle", "channels": [], "campaigns": [], "games": {}, "uptime": "00:05:30", "login_status": "Logged out", "login_user_id": null, "api_key": ""}
 {"type": "status", "text": "Watching: ChannelName"}
 {"type": "log", "message": "14:32:05 [INFO] Drop claimed"}
 {"type": "channels", "channels": [...]}

@@ -57,6 +57,7 @@ def create_settings(args: ParsedArgs):
                 "language": DEFAULT_LANG, "tray_notifications": True,
                 "enable_badges_emotes": False, "available_drops_check": False,
                 "priority_mode": PriorityMode.PRIORITY_ONLY,
+                "api_key": "",
             })
             self._altered = False
             self.log = args.log

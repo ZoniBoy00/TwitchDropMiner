@@ -23,12 +23,13 @@ export interface Settings {
   enable_badges_emotes: boolean; available_drops_check: boolean;
   connection_quality: number; priority_mode: number;
   priority: string[]; exclude: string[]; games: Record<string, Game>;
+  api_key: string;
 }
 
 export type Page = 'dashboard' | 'channels' | 'drops' | 'settings' | 'logs' | 'faq';
 
 export type WsMessage =
-  | { type: 'init'; status: string; channels: Channel[]; tray: string; campaigns: Campaign[]; games: Record<string, Game>; ws_status: Record<string, WsStatusItem>; uptime: string; drop?: { active: boolean; drop_name?: string; rewards?: string; drop_progress?: number; drop_pct?: string; campaign_name?: string; game_name?: string; campaign_progress?: number; campaign_pct?: string; drop_rem?: string; camp_rem?: string }; login_action?: string; login_code?: string; login_url?: string; login_status?: string; login_user_id?: number | null; logs?: string[] }
+  | { type: 'init'; status: string; channels: Channel[]; tray: string; campaigns: Campaign[]; games: Record<string, Game>; ws_status: Record<string, WsStatusItem>; uptime: string; drop?: { active: boolean; drop_name?: string; rewards?: string; drop_progress?: number; drop_pct?: string; campaign_name?: string; game_name?: string; campaign_progress?: number; campaign_pct?: string; drop_rem?: string; camp_rem?: string }; login_action?: string; login_code?: string; login_url?: string; login_status?: string; login_user_id?: number | null; logs?: string[]; api_key?: string }
   | { type: 'status'; text: string }
   | { type: 'log'; message: string }
   | { type: 'channels'; channels: Channel[] }

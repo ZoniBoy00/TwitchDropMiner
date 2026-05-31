@@ -39,6 +39,7 @@ export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const serverStartRef = useRef(Date.now());
   const toastIdRef = useRef(0);
+  const apiKeyRef = useRef('');
 
   const addToast = useCallback((text: string, style: string) => {
     const id = ++toastIdRef.current;
@@ -47,6 +48,14 @@ export default function App() {
 
   const removeToast = useCallback((id: number) => {
     setToasts(prev => prev.filter(t => t.id !== id));
+  }, []);
+
+  const apiFetch = useCallback((url: string, options?: RequestInit) => {
+    const headers = { ...(options?.headers || {}) } as Record<string, string>;
+    if (apiKeyRef.current) {
+      headers['X-API-Key'] = apiKeyRef.current;
+    }
+    return fetch(url, { ...options, headers });
   }, []);
 
   const handleWs = useCallback((msg: WsMessage) => {
@@ -63,7 +72,8 @@ export default function App() {
         if (msg.uptime) { const p = msg.uptime.split(':').map(Number); serverStartRef.current = Date.now() - ((p[0] * 3600 + p[1] * 60 + p[2]) * 1000); }
         if (msg.login_action) { setLoginAction(msg.login_action); if (msg.login_code) setLoginCode(msg.login_code); if (msg.login_url) setLoginUrl(msg.login_url); }
         if (msg.drop) setDrop(msg.drop);
-        fetch('/api/settings').then(r => r.json()).then(setSettings).catch(() => {});
+        if (msg.api_key !== undefined) apiKeyRef.current = msg.api_key;
+        apiFetch('/api/settings').then(r => r.json()).then(s => { setSettings(s); apiKeyRef.current = s.api_key || ''; }).catch(() => {});
         break;
       case 'status': setStatus(msg.text); break;
       case 'log': setLogs(prev => [...prev.slice(-999), msg.message]); break;
@@ -83,10 +93,10 @@ export default function App() {
       case 'toast': addToast(msg.message, msg.style); break;
       case 'settings_saved': 
         addToast('Settings saved', 'success'); 
-        fetch('/api/settings').then(r => r.json()).then(setSettings).catch(() => {});
+        apiFetch('/api/settings').then(r => r.json()).then(setSettings).catch(() => {});
         break;
     }
-  }, [addToast]);
+  }, [addToast, apiFetch]);
 
   const wasConnectedRef = useRef(false);
   const onConnectionChange = useCallback((isConnected: boolean) => {
@@ -113,7 +123,7 @@ export default function App() {
 
   const handleLogout = async () => {
     try {
-      await fetch('/api/logout', { method: 'POST' });
+      await apiFetch('/api/logout', { method: 'POST' });
       setLoginStatus('Logged out');
       setLoginUserId(null);
       addToast('Logged out', 'success');

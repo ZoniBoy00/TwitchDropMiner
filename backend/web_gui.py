@@ -6,7 +6,9 @@ import json
 import asyncio
 import logging
 import re
+import time
 from datetime import datetime
+from collections import defaultdict
 from typing import TYPE_CHECKING
 
 from aiohttp import web
@@ -328,6 +330,52 @@ class WebInventoryOverview:
             self._broadcast()
 
 
+def _make_api_key_middleware():
+    """Middleware that checks X-API-Key header on /api/* routes."""
+    @web.middleware
+    async def middleware(request, handler):
+        path = request.path
+        # Only protect /api/* routes
+        if path.startswith("/api/"):
+            settings = request.app.get("settings")
+            api_key = settings.api_key if settings else ""
+            if api_key:
+                provided = request.headers.get("X-API-Key", "")
+                if provided != api_key:
+                    return web.json_response({"error": "Unauthorized"}, status=401)
+        return await handler(request)
+    return middleware
+
+
+def _make_rate_limit_middleware():
+    """Rate limiter: 30 requests per minute per IP."""
+    hits: dict[str, list[float]] = defaultdict(list)
+
+    @web.middleware
+    async def middleware(request, handler):
+        # Only limit /api/* routes
+        if request.path.startswith("/api/"):
+            ip = request.remote or "unknown"
+            now = time.time()
+            window = 60.0
+            max_reqs = 30
+
+            # Purge old entries
+            hits[ip] = [t for t in hits[ip] if now - t < window]
+
+            if len(hits[ip]) >= max_reqs:
+                return web.json_response(
+                    {"error": "Rate limit exceeded"},
+                    status=429,
+                    headers={"Retry-After": str(int(window))},
+                )
+
+            hits[ip].append(now)
+
+        return await handler(request)
+    return middleware
+
+
 class WebGUIManager:
     def __init__(self, twitch: Twitch, port: int = 1337):
         self._twitch = twitch
@@ -335,7 +383,8 @@ class WebGUIManager:
         self._server_task: asyncio.Task | None = None
         self._close_requested = asyncio.Event()
         self._ws_clients: set[web.WebSocketResponse] = set()
-        self._app = web.Application()
+        self._app = web.Application(middlewares=[_make_api_key_middleware(), _make_rate_limit_middleware()])
+        self._app["settings"] = self._twitch.settings
         self._server_ready = asyncio.Event()
         self._start_time = datetime.now()
         self._setup_routes()
@@ -455,7 +504,7 @@ class WebGUIManager:
     async def _run_server(self):
         runner = web.AppRunner(self._app)
         await runner.setup()
-        site = web.TCPSite(runner, "0.0.0.0", self._port)
+        site = web.TCPSite(runner, "127.0.0.1", self._port)
         await site.start()
         self._server_ready.set()
         print(f"[SERVER] Web UI running at http://localhost:{self._port}", flush=True)
@@ -520,6 +569,7 @@ class WebGUIManager:
                 "login_status": self.login.status,
                 "login_user_id": self.login.user_id,
                 "drop": self.progress.get_init_drop(),
+                "api_key": self._twitch.settings.api_key,
             }
             if self.login.waiting_for == "code" and self.login.pending_code:
                 init["login_action"] = "enter_code"
@@ -588,6 +638,7 @@ class WebGUIManager:
             "enable_badges_emotes": lambda v: bool(v),
             "available_drops_check": lambda v: bool(v),
             "connection_quality": lambda v: max(1, min(6, int(v))),
+            "api_key": lambda v: str(v),
         }
         for key, conv in mapping.items():
             if key in data:
@@ -632,6 +683,7 @@ class WebGUIManager:
             "priority_mode": s.priority_mode.value,
             "priority": s.priority, "exclude": sorted(s.exclude),
             "games": self._games,
+            "api_key": s.api_key,
         })
 
     async def _api_set_settings(self, request):

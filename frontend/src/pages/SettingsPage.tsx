@@ -119,6 +119,13 @@ export function SettingsPage({ settings, games, onSave }: {
             </div>
             <input type="number" className="input" min={1} max={6} value={form.connection_quality || 1} onChange={e => setForm({ ...form, connection_quality: +e.target.value })} />
           </div>
+          <div>
+            <div className="flex items-center gap-1.5 mb-1">
+              <label className="text-[10px] text-dark-200 uppercase tracking-wider font-semibold">API Key</label>
+              <Tip text="API Key for external API access. When set, all API requests must include X-API-Key header. Leave empty to disable."><Info size={10} className="text-dark-300 cursor-help" /></Tip>
+            </div>
+            <input type="password" className="input" placeholder="Leave empty to disable" value={form.api_key || ''} onChange={e => setForm({ ...form, api_key: e.target.value })} />
+          </div>
         </div>
         <div className="card">
           <div className="flex items-center gap-2 mb-3"><Zap size={14} className="text-warning" /><h3 className="text-xs font-semibold">Toggles</h3></div>
