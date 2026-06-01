@@ -565,7 +565,7 @@ class WebGUIManager:
                 "campaigns": list(self.inv._campaigns.values()),
                 "games": self._games,
                 "ws_status": self.websockets._items,
-                "uptime": str(datetime.now() - self._start_time).split(".")[0],
+                "uptime": f"{int((datetime.now() - self._start_time).total_seconds()) // 3600}:{int((datetime.now() - self._start_time).total_seconds()) % 3600 // 60:02d}:{int((datetime.now() - self._start_time).total_seconds()) % 60:02d}",
                 "login_status": self.login.status,
                 "login_user_id": self.login.user_id,
                 "drop": self.progress.get_init_drop(),
@@ -666,7 +666,7 @@ class WebGUIManager:
         return web.json_response({
             "status": self.status.text,
             "tray": self.tray.state,
-            "uptime": str(datetime.now() - self._start_time).split(".")[0],
+            "uptime": f"{int((datetime.now() - self._start_time).total_seconds()) // 3600}:{int((datetime.now() - self._start_time).total_seconds()) % 3600 // 60:02d}:{int((datetime.now() - self._start_time).total_seconds()) % 60:02d}",
             "channels": len(self.channels._channels),
             "campaigns": len(self.inv._campaigns),
             "ws_clients": len(self._ws_clients),

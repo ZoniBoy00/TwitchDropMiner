@@ -69,7 +69,7 @@ export default function App() {
         if (msg.logs) setLogs(msg.logs);
         if (msg.login_status) setLoginStatus(msg.login_status);
         if (msg.login_user_id !== undefined) setLoginUserId(msg.login_user_id);
-        if (msg.uptime) { const p = msg.uptime.split(':').map(Number); serverStartRef.current = Date.now() - ((p[0] * 3600 + p[1] * 60 + p[2]) * 1000); }
+        if (msg.uptime) { const p = msg.uptime.split(':').map(Number); if (p.length === 3 && !isNaN(p[0]) && !isNaN(p[1]) && !isNaN(p[2])) { serverStartRef.current = Date.now() - ((p[0] * 3600 + p[1] * 60 + p[2]) * 1000); } }
         if (msg.login_action) { setLoginAction(msg.login_action); if (msg.login_code) setLoginCode(msg.login_code); if (msg.login_url) setLoginUrl(msg.login_url); }
         if (msg.drop) setDrop(msg.drop);
         if (msg.api_key !== undefined) apiKeyRef.current = msg.api_key;
