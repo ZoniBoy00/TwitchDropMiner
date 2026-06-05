@@ -6,9 +6,9 @@
     <link rel="icon" type="image/x-icon" href="/favicon.ico?v=2">
     <title>Twitch Drops Miner</title>
     <script>
-      // Estä bfcache (Back-Forward Cache) - Opera GX, Chrome jne.
-      // beforeunload estää Chromiumia laittamasta sivua bfcacheen,
-      // pageshow on varotoimi jos sivu silti palautuu sieltä.
+      // Disable bfcache (Back-Forward Cache) for Opera GX, Chrome etc.
+      // beforeunload prevents Chromium from putting the page into bfcache,
+      // pageshow is a fallback if the page still gets restored from it.
       window.addEventListener('beforeunload', function() {});
       window.addEventListener('pageshow', function(e) {
         if (e.persisted) window.location.reload();
