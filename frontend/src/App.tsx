@@ -94,7 +94,7 @@ export default function App() {
       case 'toast': addToast(msg.message, msg.style); break;
       case 'settings_saved': 
         addToast('Settings saved', 'success'); 
-        apiFetch('/api/settings').then(r => r.json()).then(setSettings).catch(() => {});
+        apiFetch('/api/settings').then(r => r.json()).then(s => { setSettings(s); apiKeyRef.current = s.api_key || ''; }).catch(() => {});
         break;
     }
   }, [addToast, apiFetch]);
@@ -107,6 +107,14 @@ export default function App() {
 
   const { connected, send } = useWebSocket(handleWs, onConnectionChange);
   useEffect(() => { wasConnectedRef.current = connected; }, [connected]);
+
+  // Save settings: update apiKeyRef BEFORE sending so settings_saved fetch works
+  const handleSaveSettings = useCallback((data: Record<string, unknown>) => {
+    if (data.api_key !== undefined) {
+      apiKeyRef.current = data.api_key as string;
+    }
+    send({ action: 'save_settings', ...data });
+  }, [send]);
 
   // Uptime timer
   useEffect(() => {
@@ -143,8 +151,8 @@ export default function App() {
             {page === 'dashboard' && <Dashboard status={status} channels={channels} campaigns={campaigns} wsStatus={wsStatus} uptime={uptime} drop={drop as any} games={games} />}
             {page === 'channels' && <ChannelsPage channels={channels} />}
             {page === 'drops' && <DropsPage campaigns={campaigns} games={games} />}
-            {page === 'settings' && <SettingsPage settings={settings} games={games} onSave={(d) => send({ action: 'save_settings', ...d as unknown as Record<string, unknown> })} />}
-            {page === 'api' && <APIPage settings={settings} onSave={(d) => send({ action: 'save_settings', ...d as unknown as Record<string, unknown> })} />}
+            {page === 'settings' && <SettingsPage settings={settings} games={games} onSave={handleSaveSettings} />}
+            {page === 'api' && <APIPage settings={settings} onSave={handleSaveSettings} />}
             {page === 'logs' && <LogsPage logs={logs} onClear={() => setLogs([])} />}
             {page === 'faq' && <FAQPage />}
           </div>
