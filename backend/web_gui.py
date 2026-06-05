@@ -495,12 +495,10 @@ class WebGUIManager:
         for candidate in [os.path.join(base, "web_static"), os.path.join(base, "..", "web_static")]:
             if os.path.exists(os.path.join(candidate, "index.html")):
                 self._static_dir = os.path.normpath(candidate)
-                assets = os.path.join(self._static_dir, "assets")
-                if os.path.exists(assets):
-                    self._app.router.add_static("/assets", assets)
-                # Serve PWA files from web_static root (manifest, sw.js, icons)
-                self._app.router.add_static("/", self._static_dir, show_index=False)
-                print(f"[SERVER] Serving React build from {self._static_dir}", flush=True)
+                # Serve all static files via custom handler with no-cache headers
+                # (using add_static would let browsers cache assets indefinitely)
+                r.add_get("/{filename:.*}", self._static)
+                print(f"[SERVER] Serving React build from {self._static_dir} (no-cache)", flush=True)
                 break
 
     async def _run_server(self):
@@ -540,10 +538,35 @@ class WebGUIManager:
 
     # --- HTTP Handlers ---
     async def _index(self, request):
+        """Serve index.html with cache-busted asset URLs and no ETag/Last-Modified.
+        The ?v=<build_mtime> query parameter forces browsers to skip their cache
+        even if they ignored Cache-Control headers."""
         if self._static_dir:
             index_path = os.path.join(self._static_dir, "index.html")
             if os.path.exists(index_path):
-                return web.FileResponse(index_path, headers={"Cache-Control": "no-cache, no-store, must-revalidate", "Pragma": "no-cache", "Expires": "0"})
+                build_time = int(os.path.getmtime(self._static_dir))
+                with open(index_path, "r", encoding="utf-8") as f:
+                    content = f.read()
+                # Add ?v=<build_mtime> to all JS and CSS asset URLs
+                content = re.sub(
+                    r'(src="/assets/[^"]+\.(?:js|css))"',
+                    rf'\1?v={build_time}"',
+                    content,
+                )
+                content = re.sub(
+                    r'(href="/assets/[^"]+\.(?:js|css))"',
+                    rf'\1?v={build_time}"',
+                    content,
+                )
+                return web.Response(
+                    text=content,
+                    content_type="text/html",
+                    headers={
+                        "Cache-Control": "no-cache, no-store, must-revalidate",
+                        "Pragma": "no-cache",
+                        "Expires": "0",
+                    },
+                )
         return web.Response(text="<h1>Build not found</h1><p>Run 'npm run build' in frontend/</p>", content_type="text/html")
 
     async def _favicon(self, request):
@@ -553,13 +576,22 @@ class WebGUIManager:
                 return web.FileResponse(ico_path, headers={"Cache-Control": "no-cache"})
         return web.Response(status=404)
 
-    async def _pwa_static(self, request):
-        """Serve PWA files from web_static root (manifest, sw.js, icons, etc.)"""
+    async def _static(self, request):
+        """Serve all static files (assets, PWA files, etc.) with no-cache headers.
+        Prevents browsers from caching JS/CSS between builds."""
         if self._static_dir:
             filename = request.match_info.get("filename", "")
-            filepath = os.path.join(self._static_dir, filename)
+            if not filename:
+                return web.Response(status=404)
+            filepath = os.path.normpath(os.path.join(self._static_dir, filename))
+            if not filepath.startswith(self._static_dir):
+                return web.Response(status=404)
             if os.path.exists(filepath) and os.path.isfile(filepath):
-                return web.FileResponse(filepath)
+                return web.FileResponse(filepath, headers={
+                    "Cache-Control": "no-cache, no-store, must-revalidate",
+                    "Pragma": "no-cache",
+                    "Expires": "0"
+                })
         return web.Response(status=404)
 
     async def _websocket(self, request):
