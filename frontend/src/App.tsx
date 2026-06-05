@@ -9,6 +9,7 @@ import { Dashboard } from './pages/Dashboard';
 import { ChannelsPage } from './pages/ChannelsPage';
 import { DropsPage } from './pages/DropsPage';
 import { SettingsPage } from './pages/SettingsPage';
+import { APIPage } from './pages/APIPage';
 import { LogsPage } from './pages/LogsPage';
 import { FAQPage } from './pages/FAQPage';
 
@@ -119,7 +120,7 @@ export default function App() {
     return () => clearInterval(t);
   }, []);
 
-  const titles: Record<Page, string> = { dashboard: 'Dashboard', channels: 'Channels', drops: 'Drops Inventory', settings: 'Settings', logs: 'Logs', faq: 'FAQ' };
+  const titles: Record<Page, string> = { dashboard: 'Dashboard', channels: 'Channels', drops: 'Drops Inventory', api: 'API', settings: 'Settings', logs: 'Logs', faq: 'FAQ' };
 
   const handleLogout = async () => {
     try {
@@ -143,6 +144,7 @@ export default function App() {
             {page === 'channels' && <ChannelsPage channels={channels} />}
             {page === 'drops' && <DropsPage campaigns={campaigns} games={games} />}
             {page === 'settings' && <SettingsPage settings={settings} games={games} onSave={(d) => send({ action: 'save_settings', ...d as unknown as Record<string, unknown> })} />}
+            {page === 'api' && <APIPage settings={settings} onSave={(d) => send({ action: 'save_settings', ...d as unknown as Record<string, unknown> })} />}
             {page === 'logs' && <LogsPage logs={logs} onClear={() => setLogs([])} />}
             {page === 'faq' && <FAQPage />}
           </div>

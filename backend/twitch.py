@@ -1239,11 +1239,17 @@ class Twitch:
                 # badge confirmation?
             ):
                 self.change_state(State.INVENTORY_FETCH)
-                await self.gql_request(
-                    GQL_QUERIES["NotificationsDelete"].with_variables(
-                        {"input": {"id": data["id"]}}
+                try:
+                    await self.gql_request(
+                        GQL_QUERIES["NotificationsDelete"].with_variables(
+                            {"input": {"id": data["id"]}}
+                        )
                     )
-                )
+                except GQLException as e:
+                    if "notification not found" in str(e):
+                        pass
+                    else:
+                        raise
 
     async def get_auth(self) -> _AuthState:
         await self._auth_state.validate()

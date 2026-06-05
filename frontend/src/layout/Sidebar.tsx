@@ -1,4 +1,4 @@
-import { LayoutDashboard, Tv, Gift, Settings, ScrollText, HelpCircle, LogOut, UserCheck, UserX, X } from 'lucide-react';
+import { LayoutDashboard, Tv, Gift, Settings, ScrollText, HelpCircle, LogOut, UserCheck, UserX, X, KeyRound } from 'lucide-react';
 import { StatusDot } from '../components/StatusDot';
 import type { Page } from '../types';
 
@@ -11,6 +11,7 @@ export function Sidebar({ page, setPage, wsConnected, status, uptime, loginStatu
     { id: 'dashboard', icon: <LayoutDashboard size={16} />, label: 'Dashboard' },
     { id: 'channels', icon: <Tv size={16} />, label: 'Channels' },
     { id: 'drops', icon: <Gift size={16} />, label: 'Drops' },
+    { id: 'api', icon: <KeyRound size={16} />, label: 'API' },
     { id: 'settings', icon: <Settings size={16} />, label: 'Settings' },
     { id: 'logs', icon: <ScrollText size={16} />, label: 'Logs' },
     { id: 'faq', icon: <HelpCircle size={16} />, label: 'FAQ' },

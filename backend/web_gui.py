@@ -498,6 +498,8 @@ class WebGUIManager:
                 assets = os.path.join(self._static_dir, "assets")
                 if os.path.exists(assets):
                     self._app.router.add_static("/assets", assets)
+                # Serve PWA files from web_static root (manifest, sw.js, icons)
+                self._app.router.add_static("/", self._static_dir, show_index=False)
                 print(f"[SERVER] Serving React build from {self._static_dir}", flush=True)
                 break
 
@@ -549,6 +551,15 @@ class WebGUIManager:
             ico_path = os.path.join(self._static_dir, "favicon.ico")
             if os.path.exists(ico_path):
                 return web.FileResponse(ico_path, headers={"Cache-Control": "no-cache"})
+        return web.Response(status=404)
+
+    async def _pwa_static(self, request):
+        """Serve PWA files from web_static root (manifest, sw.js, icons, etc.)"""
+        if self._static_dir:
+            filename = request.match_info.get("filename", "")
+            filepath = os.path.join(self._static_dir, filename)
+            if os.path.exists(filepath) and os.path.isfile(filepath):
+                return web.FileResponse(filepath)
         return web.Response(status=404)
 
     async def _websocket(self, request):

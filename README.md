@@ -112,6 +112,7 @@ TwitchDropMiner/
 │   │   │   ├── Sidebar.tsx
 │   │   │   └── Topbar.tsx
 │   │   ├── pages/             # Page components
+│   │   │   ├── APIPage.tsx
 │   │   │   ├── ChannelsPage.tsx
 │   │   │   ├── Dashboard.tsx
 │   │   │   ├── DropsPage.tsx
@@ -154,7 +155,8 @@ TwitchDropMiner/
 | **Dashboard** | Status cards, drop/campaign progress, watching channel, 8 WebSocket connections |
 | **Channels** | Channel table with status, game, drops, viewers, ACL |
 | **Drops** | Campaign inventory with game boxart icons, progress bars |
-| **Settings** | Proxy, language, priority mode, connection quality, API key, priority/exclude lists, login status |
+| **API** | API key management, authentication settings, endpoint reference with built-in testing |
+| **Settings** | Proxy, language, priority mode, connection quality, priority/exclude lists, login status |
 | **Logs** | Real-time filtered logs with timestamps and search |
 | **FAQ** | Built-in troubleshooting guide and common questions |
 
@@ -183,6 +185,13 @@ TwitchDropMiner/
 
 ## Recent Improvements
 
+### v17.1 — Dedicated API Page (June 2026)
+A new **API** page has been added to the web dashboard sidebar, providing:
+- **API Key Management** — Set, view, copy, and test your API key from a dedicated page (moved from Settings)
+- **Endpoint Reference** — Complete list of all REST API endpoints with methods, paths, and descriptions
+- **Built-in API Tester** — Test the `/api/status` endpoint directly from the UI with the current API key
+- **Authentication Guide** — Example curl commands and rate limit information
+
 ### Auto Channel Switching
 When the currently watched channel goes offline, the miner **automatically switches** to the next best available channel. No more getting stuck in an idle state — mining continues seamlessly.
 
@@ -209,7 +218,7 @@ All API endpoints are rate-limited to 30 requests per minute per IP to prevent a
 
 ## REST API
 
-> **Note:** All `/api/*` endpoints require the `X-API-Key` header if an API key is configured in Settings. Requests without a valid key return `401 Unauthorized`. Rate limiting (30 req/min/IP) applies to all `/api/*` routes.
+> **Note:** API management is available through the **API** page in the web dashboard (sidebar). All `/api/*` endpoints require the `X-API-Key` header if an API key is configured. Requests without a valid key return `401 Unauthorized`. Rate limiting (30 req/min/IP) applies to all `/api/*` routes.
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
