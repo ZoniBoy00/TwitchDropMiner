@@ -145,9 +145,7 @@ CMD ["python", "backend/server.py", "--port", "1337", "-vv", "--log"]
 ## First-Time Login
 
 1. Open the web dashboard at `http://localhost:1337`
-2. You'll see a login overlay with two options:
-   - **Device Activation Code** (recommended) — Opens Twitch's activation page, enter the 6-digit code
-   - **Username & Password** — Direct login (may trigger captcha)
+2. You'll see a login overlay with the **Device Activation Code** flow — enter the 6-digit code at twitch.tv/activate
 3. After successful login, the miner starts automatically
 
-> **Tip:** Use the Device Activation Code method — it's more reliable and avoids captcha issues.
+> **Note:** Only the device code flow is exposed in the web UI. The backend has username/password + 2FA code as a fallback, but it is not shown in the current dashboard.

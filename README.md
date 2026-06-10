@@ -299,9 +299,9 @@ English, Deutsch, Français, Español, Português, Italiano, Nederlands, Polski,
 5. Verify you're logged in (sidebar shows green "Logged in" status)
 
 ### Q: How do I log in?
-**A:** When the page loads, you'll see a **LoginOverlay**. You have two options:
-- **Username/Password**: Enter your Twitch credentials directly
-- **Activation Code**: Use the device code flow with `twitch.tv/activate`
+**A:** When the page loads, you'll see a **LoginOverlay** with the device activation code flow. Enter the code at `twitch.tv/activate` to log in.
+
+> **Note:** The backend also supports username/password + 2FA, but the web UI only shows the device code method.
 
 ### Q: The logout button doesn't work
 **A:** Try these:

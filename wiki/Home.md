@@ -22,7 +22,7 @@ AFK mine timed Twitch drops without watching streams. Saves bandwidth by only fe
 - **3 priority modes** — Priority list, Ending Soonest, Low Availability First
 - **Proxy support** — Full URL proxy configuration
 - **Responsive mobile UI** — Hamburger menu, drawer sidebar
-- **Multiple login methods** — Username/password + 2FA or OAuth device code flow
+- **Single login method (UI)** — OAuth device code flow via twitch.tv/activate (backend supports username/password + 2FA as fallback, but only the device code flow is exposed in the web UI)
 - **8 client types** — Choose from Web, Mobile Web, Android App, or Smart TV Twitch client types
 
 ## Quick Start

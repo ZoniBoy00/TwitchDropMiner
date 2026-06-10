@@ -8,7 +8,7 @@ const faqs = [
   },
   {
     q: 'How do I log in?',
-    a: 'When the page loads, you\'ll see a **LoginOverlay**. You have two options:\n- **Username/Password**: Enter your Twitch credentials directly — the miner will handle authentication\n- **Activation Code**: Use the device code flow at `twitch.tv/activate`\nAfter logging in, the sidebar shows your login status in green.',
+    a: 'When the page loads, you\'ll see a **LoginOverlay** with the device activation code flow. Enter the code at `twitch.tv/activate` to log in.\n\n> **Note:** The backend also supports username/password + 2FA, but the web UI only shows the device code method.',
     icon: 'HelpCircle'
   },
   {

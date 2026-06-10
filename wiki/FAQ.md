@@ -42,11 +42,11 @@ Twitch is requiring a captcha challenge. Solutions:
 2. The code expires after a few minutes — refresh and try again
 3. Try a different browser or incognito mode
 
-### Username/password login fails
+### Login fails
 
-1. Check credentials — try logging into Twitch manually first
-2. If you have 2FA enabled, include the 2FA code in the `token` field
-3. Twitch may require captcha — switch to Device Activation Code method
+1. Make sure you enter the device code exactly as shown (case-sensitive)
+2. The code expires after a few minutes — refresh and try again
+3. Try a different browser or incognito mode
 
 ### Session expires frequently
 
