@@ -22,12 +22,12 @@ export function Sidebar({ page, setPage, wsConnected, status, uptime, loginStatu
     <div className="flex flex-col w-full h-full bg-dark-800/90 backdrop-blur-md border-r border-dark-600/50">
       <div className="p-4 border-b border-dark-600/50 flex items-center justify-between">
         <div className="inline-flex items-center gap-2">
-          <div className="relative w-10 h-10 rounded-lg overflow-hidden flex items-center justify-center ring-1 ring-accent/30">
+          <div className="relative w-14 h-14 rounded-xl overflow-hidden flex items-center justify-center ring-1 ring-accent/30 shadow-lg shadow-accent/10">
             <img src="/tdm-logo-v3.jpg" alt="TDM" className="w-full h-full object-cover" />
           </div>
           <div>
-            <h1 className="text-sm font-bold tracking-wider">DROPS</h1>
-            <p className="text-[9px] text-dark-300 tracking-widest uppercase">Miner</p>
+            <h1 className="text-base font-bold tracking-wider">DROPS</h1>
+            <p className="text-[10px] text-dark-300 tracking-widest uppercase">Miner</p>
           </div>
         </div>
         <button onClick={onClose} className="md:hidden p-1 rounded hover:bg-dark-600/50 text-dark-400 hover:text-dark-50 transition-colors">
