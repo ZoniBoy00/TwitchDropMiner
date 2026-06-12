@@ -22,7 +22,7 @@ export function Sidebar({ page, setPage, wsConnected, status, uptime, loginStatu
     <div className="flex flex-col w-full h-full bg-dark-800/90 backdrop-blur-md border-r border-dark-600/50">
       <div className="p-4 border-b border-dark-600/50 flex items-center justify-between">
         <div className="inline-flex items-center gap-2">
-          <div className="relative w-14 h-14 rounded-xl overflow-hidden flex items-center justify-center ring-1 ring-accent/30 shadow-lg shadow-accent/10">
+          <div className="relative w-20 h-20 rounded-xl overflow-hidden flex items-center justify-center ring-1 ring-accent/30 shadow-lg shadow-accent/10">
             <img src="/tdm-logo-v3.jpg" alt="TDM" className="w-full h-full object-cover" />
           </div>
           <div>
