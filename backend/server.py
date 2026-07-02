@@ -127,7 +127,7 @@ async def async_main(args: ParsedArgs):
 
     print(f"[SERVER] Starting Twitch Drops Miner on port {args.port}", flush=True)
 
-    client = Twitch(settings, web_mode=True)
+    client = Twitch(settings)
     client.gui = WebGUIManager(client, port=args.port)
 
     loop = asyncio.get_running_loop()
