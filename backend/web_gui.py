@@ -376,6 +376,14 @@ def _make_rate_limit_middleware():
     return middleware
 
 
+class _DummyHelp:
+    """Tynkä yhteensopivuudelle upstreamin gui.help.-viittauksille"""
+    class _DummyButton:
+        def config(self, **kwargs):
+            pass
+    _invalidate_button = _DummyButton()
+
+
 class WebGUIManager:
     def __init__(self, twitch: Twitch, port: int = 1337):
         self._twitch = twitch
@@ -396,6 +404,7 @@ class WebGUIManager:
         self.tray = WebTrayIcon(self)
         self.inv = WebInventoryOverview(self)
         self.output = self
+        self.help = _DummyHelp()
         self._game_names: set[str] = set()
         self._games: dict[str, dict] = {}
         # Log history: persist last 500 lines, send on WS init so they survive page refresh
