@@ -377,7 +377,7 @@ def _make_rate_limit_middleware():
 
 
 class _DummyHelp:
-    """Tynkä yhteensopivuudelle upstreamin gui.help.-viittauksille"""
+    """Stub for compatibility with upstream gui.help references"""
     class _DummyButton:
         def config(self, **kwargs):
             pass
