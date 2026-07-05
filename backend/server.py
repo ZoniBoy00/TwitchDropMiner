@@ -95,7 +95,7 @@ def create_settings(args: ParsedArgs):
     return WebSettings()
 
 
-FORMATTER = logging.Formatter("{levelname}: {message}", style="{", datefmt="%H:%M:%S")
+FORMATTER = logging.Formatter("{levelname}: {message}", style="{", datefmt="%Y-%m-%d %H:%M:%S")
 
 
 async def async_main(args: ParsedArgs):

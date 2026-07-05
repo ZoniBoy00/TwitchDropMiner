@@ -473,7 +473,7 @@ class WebGUIManager:
         self.progress.display(None)
 
     def print(self, message: str):
-        stamp = datetime.now().strftime("%H:%M:%S")
+        stamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         formatted = f"{stamp}: {message}"
         self._log_history.append(formatted)
         if len(self._log_history) > 500:
