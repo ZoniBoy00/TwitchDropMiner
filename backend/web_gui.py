@@ -587,16 +587,21 @@ class WebGUIManager:
 
     async def _static(self, request):
         """Serve all static files (assets, PWA files, etc.) with no-cache headers.
-        Prevents browsers from caching JS/CSS between builds."""
+        If the file is not found, serve index.html (SPA routing)."""
         if self._static_dir:
             filename = request.match_info.get("filename", "")
-            if not filename:
-                return web.Response(status=404)
-            filepath = os.path.normpath(os.path.join(self._static_dir, filename))
-            if not filepath.startswith(self._static_dir):
-                return web.Response(status=404)
-            if os.path.exists(filepath) and os.path.isfile(filepath):
-                return web.FileResponse(filepath, headers={
+            if filename:
+                filepath = os.path.normpath(os.path.join(self._static_dir, filename))
+                if filepath.startswith(self._static_dir) and os.path.exists(filepath) and os.path.isfile(filepath):
+                    return web.FileResponse(filepath, headers={
+                        "Cache-Control": "no-cache, no-store, must-revalidate",
+                        "Pragma": "no-cache",
+                        "Expires": "0"
+                    })
+            # SPA fallback — serve index.html for unknown paths
+            index_path = os.path.join(self._static_dir, "index.html")
+            if os.path.exists(index_path):
+                return web.FileResponse(index_path, headers={
                     "Cache-Control": "no-cache, no-store, must-revalidate",
                     "Pragma": "no-cache",
                     "Expires": "0"

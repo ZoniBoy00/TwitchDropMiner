@@ -20,7 +20,14 @@ import { LoginOverlay } from './components/LoginOverlay';
 
 // ─── APP ──────────────────────────────────────────────
 export default function App() {
-  const [page, setPage] = useState<Page>('dashboard');
+  // URL-based initial page
+  const pathToPage: Record<string, Page> = { '/channels': 'channels', '/drops': 'drops', '/api': 'api', '/settings': 'settings', '/logs': 'logs', '/faq': 'faq' };
+  const [page, setPageState] = useState<Page>(pathToPage[window.location.pathname] || 'dashboard');
+  const setPage = useCallback((p: Page) => {
+    setPageState(p);
+    const path = p === 'dashboard' ? '/' : `/${p}`;
+    history.pushState({ page: p }, '', path);
+  }, []);
   const [status, setStatus] = useState('');
   const [channels, setChannels] = useState<Channel[]>([]);
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
@@ -98,6 +105,16 @@ export default function App() {
         break;
     }
   }, [addToast, apiFetch]);
+
+  // URL popstate for back/forward navigation
+  useEffect(() => {
+    const onPop = (e: PopStateEvent) => {
+      const p = (e.state as { page?: Page } | null)?.page;
+      if (p && ['dashboard', 'channels', 'drops', 'settings', 'api', 'logs', 'faq'].includes(p)) setPageState(p);
+    };
+    window.addEventListener('popstate', onPop);
+    return () => window.removeEventListener('popstate', onPop);
+  }, []);
 
   const wasConnectedRef = useRef(false);
   const onConnectionChange = useCallback((isConnected: boolean) => {
