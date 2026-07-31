@@ -18,8 +18,18 @@ export function DropsPage({ campaigns, games }: { campaigns: Campaign[]; games: 
               </div>
               <span className={`badge ${c.status === 'active' ? 'badge-green' : c.status === 'upcoming' ? 'badge-yellow' : 'badge-red'}`}>{c.status}</span>
             </div>
-            <div className="flex justify-between text-[11px] mb-1"><span className="text-dark-300">Progress</span><span className="font-medium">{(c.progress * 100).toFixed(1)}%</span></div>
-            <ProgressBar value={c.progress} color="green" />
+            <div className="flex justify-between text-[11px] mb-1">
+              <span className="text-dark-300">Progress</span>
+              {(() => {
+                const active = c.drops.find(d => !d.claimed) || c.drops[0];
+                if (!active) return <span className="font-medium">{(c.progress * 100).toFixed(1)}%</span>;
+                return <span className="font-medium">{(active.progress * 100).toFixed(1)}% · {active.cur}/{active.req}m</span>;
+              })()}
+            </div>
+            {(() => {
+              const active = c.drops.find(d => !d.claimed) || c.drops[0];
+              return <ProgressBar value={active ? active.progress : c.progress} color="green" />;
+            })()}
             <div className="text-[10px] text-dark-400 mt-1.5">{c.starts ? `Starts: ${new Date(c.starts).toLocaleString()}` : ''} {c.ends ? `Ends: ${new Date(c.ends).toLocaleString()}` : ''}</div>
             {c.drops.map(d => (
               <div key={d.id} className="flex items-center gap-2.5 py-1.5 border-t border-dark-600/30 first:border-t-0 text-xs">

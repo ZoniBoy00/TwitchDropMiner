@@ -34,7 +34,7 @@ export type WsMessage =
   | { type: 'log'; message: string }
   | { type: 'channels'; channels: Channel[] }
   | { type: 'drop'; active: boolean; drop_name?: string; rewards?: string; drop_progress?: number; drop_pct?: string; campaign_name?: string; game_name?: string; campaign_progress?: number; campaign_pct?: string; drop_rem?: string; camp_rem?: string }
-  | { type: 'progress'; drop_remaining: string; campaign_remaining: string }
+  | { type: 'progress'; drop_remaining: string; campaign_remaining: string; drop_id?: string | null; drop_progress?: number; drop_cur?: number; drop_req?: number; campaign_progress?: number }
   | { type: 'inventory'; campaigns: Campaign[] }
   | { type: 'tray'; state: string }
   | { type: 'ws_status'; items: Record<string, WsStatusItem> }

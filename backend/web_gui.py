@@ -164,6 +164,11 @@ class WebCampaignProgress:
             "type": "progress",
             "drop_remaining": f"{dh:>2}:{dm:02}:{s:02}",
             "campaign_remaining": f"{ch:>2}:{cm:02}:{s:02}",
+            "drop_id": d.id if d else None,
+            "drop_progress": d.progress if d else 0,
+            "drop_cur": d.current_minutes if d else 0,
+            "drop_req": d.required_minutes if d else 0,
+            "campaign_progress": d.campaign.progress if d else 0,
         })
 
     async def _timer_loop(self):

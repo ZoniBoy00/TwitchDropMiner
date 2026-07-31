@@ -87,7 +87,14 @@ export default function App() {
       case 'log': setLogs(prev => [...prev.slice(-999), msg.message]); break;
       case 'channels': setChannels(msg.channels); break;
       case 'drop': setDrop(msg); break;
-      case 'progress': break;
+      case 'progress':
+        // Live-update the active drop's progress in the campaigns list
+        if (msg.drop_id && msg.drop_progress !== undefined) {
+          setCampaigns(prev => prev.map(c => c.drops.some(d => d.id === msg.drop_id)
+            ? { ...c, progress: msg.campaign_progress ?? c.progress, drops: c.drops.map(d => d.id === msg.drop_id ? { ...d, progress: msg.drop_progress!, cur: msg.drop_cur ?? d.cur, req: msg.drop_req ?? d.req } : d) }
+            : c));
+        }
+        break;
       case 'inventory': setCampaigns(msg.campaigns); break;
       case 'ws_status': setWsStatus(msg.items); break;
       case 'games_update': setGames(msg.games); break;
