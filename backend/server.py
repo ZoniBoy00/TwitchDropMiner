@@ -142,6 +142,7 @@ async def async_main(args: ParsedArgs):
         pass
     except Exception:
         exit_status = 1
+        log.exception("Fatal error encountered")
         client.prevent_close()
         client.print("Fatal error encountered:\n")
         client.print(traceback.format_exc())

@@ -9,6 +9,7 @@ import re
 import time
 from datetime import datetime
 from collections import defaultdict
+from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from aiohttp import web
@@ -21,6 +22,13 @@ if TYPE_CHECKING:
     from inventory import TimedDrop, DropsCampaign
 
 logger = logging.getLogger("TwitchDrops")
+
+
+@dataclass(frozen=True)
+class WebLoginData:
+    username: str
+    password: str
+    token: str
 
 
 def _json(obj):
@@ -87,13 +95,12 @@ class WebLoginForm:
         self.waiting_for = None
 
     async def ask_login(self):
-        from gui import LoginData
         self.update(_("gui", "login", "required"), None)
         self._mgr._send({"type": "login", "action": "request_login"})
         while True:
             self._mgr.print(_("gui", "login", "request"))
             await self.wait_for_login_press()
-            ld = LoginData(self._web_username, self._web_password, self._web_token)
+            ld = WebLoginData(self._web_username, self._web_password, self._web_token)
             if not (3 <= len(ld.username) <= 25) or not re.match(r"^[a-zA-Z0-9_]+$", ld.username):
                 self._mgr._send({"type": "login", "error": "Invalid username"})
                 continue
