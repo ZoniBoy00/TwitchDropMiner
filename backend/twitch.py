@@ -387,7 +387,7 @@ class _AuthState:
                 for invalid_token_attempt in range(2):
                     cookie = jar.filter_cookies(client_info.CLIENT_URL)
                     if "auth-token" not in cookie:
-                        self.access_token = await self._oauth_login()
+                        self.access_token = await self._login()
                         cookie["auth-token"] = self.access_token
                     elif not hasattr(self, "access_token"):
                         logger.info("Restoring session from cookie")
@@ -862,6 +862,7 @@ class Twitch:
                     self.watch(new_watching)
                     # break the state change chain by clearing the flag
                     self._state_change.clear()
+                    await self._state_change.wait()
                 elif watching_channel is not None and self.can_watch(watching_channel):
                     # otherwise, continue watching what we had before
                     self.gui.status.update(
@@ -869,6 +870,7 @@ class Twitch:
                     )
                     # break the state change chain by clearing the flag
                     self._state_change.clear()
+                    await self._state_change.wait()
                 else:
                     # not watching anything and there isn't anything to watch either
                     self.print(_("status", "no_channel"))
@@ -897,6 +899,7 @@ class Twitch:
             if not channel.online:
                 # if the channel isn't online anymore, we stop watching it
                 self.stop_watching()
+                self.change_state(State.CHANNEL_SWITCH)
                 continue
             # logger.log(CALL, f"Sending watch payload to: {channel.name}")
             succeeded: bool = await channel.send_watch()

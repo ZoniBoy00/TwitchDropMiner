@@ -501,12 +501,12 @@ class DropsCampaign:
     def bump_minutes(self, channel: Channel) -> None:
         # NOTE: Use a temporary list to ensure all drops are bumped before checking
         if any([drop._bump_minutes(channel) for drop in self.drops]):
-            # Executes if any drop's extra_current_minutes reach MAX_ESTIMATED_MINUTES
-            # TODO: Figure out a better way to handle this case
+            # Twitch has not confirmed the locally estimated progress.
+            # Refresh the inventory instead of switching channels blindly.
             logger.warning(
                 f"At least one of the drops in campaign \"{self.name}({self.game.name})\" "
-                "has reached the maximum extra minutes limit!"
+                "has reached the maximum estimated minutes; refreshing inventory"
             )
-            self._twitch.change_state(State.CHANNEL_SWITCH)
+            self._twitch.change_state(State.INVENTORY_FETCH)
         if (first_drop := self.first_drop) is not None:
             first_drop.display()
