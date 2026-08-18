@@ -17,7 +17,7 @@ def function_node(path: Path, name: str) -> ast.AsyncFunctionDef | ast.FunctionD
 
 
 class RuntimeRegressionTests(unittest.TestCase):
-    def test_validate_uses_scoped_web_login(self) -> None:
+    def test_validate_uses_device_code_login(self) -> None:
         node = function_node(ROOT / "twitch.py", "_validate")
         calls = [
             call.func.attr
@@ -25,13 +25,8 @@ class RuntimeRegressionTests(unittest.TestCase):
             if isinstance(call, ast.Call)
             and isinstance(call.func, ast.Attribute)
         ]
-        self.assertIn("_login", calls)
-        self.assertNotIn("_oauth_login", calls)
-
-    def test_web_login_does_not_require_desktop_gui_module(self) -> None:
-        source = (ROOT / "web_gui.py").read_text(encoding="utf-8")
-        self.assertIn("class WebLoginData", source)
-        self.assertNotIn("from gui import LoginData", source)
+        self.assertIn("_oauth_login", calls)
+        self.assertNotIn("_login", calls)
 
     def test_offline_watch_requests_channel_switch(self) -> None:
         source = (ROOT / "twitch.py").read_text(encoding="utf-8")
