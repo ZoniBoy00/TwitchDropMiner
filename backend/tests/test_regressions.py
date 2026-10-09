@@ -59,6 +59,33 @@ class RuntimeRegressionTests(unittest.TestCase):
         self.assertIn("State.INVENTORY_FETCH", block)
         self.assertNotIn("State.CHANNEL_SWITCH", block)
 
+    def test_active_watch_transport_uses_playlist_segments(self) -> None:
+        node = function_node(ROOT / "channel.py", "send_watch")
+        block = ast.unparse(node)
+        self.assertIn("HEAD", block)
+        self.assertIn("chunks_list", block)
+        self.assertNotIn("_spade_url", block)
+
+    def test_playlist_watch_checks_each_media_segment(self) -> None:
+        node = function_node(ROOT / "channel.py", "send_watch")
+        block = ast.unparse(node)
+        self.assertIn("for stream_chunk_url in chunks_list", block)
+        self.assertIn("head_response.status != 200", block)
+
+    def test_watch_interval_matches_playlist_polling(self) -> None:
+        tree = ast.parse((ROOT / "constants.py").read_text(encoding="utf-8"))
+        assignment = next(
+            node for node in tree.body
+            if isinstance(node, ast.Assign)
+            and any(isinstance(target, ast.Name) and target.id == "WATCH_INTERVAL" for target in node.targets)
+        )
+        seconds = next(
+            keyword.value.value
+            for keyword in assignment.value.keywords
+            if keyword.arg == "seconds"
+        )
+        self.assertEqual(seconds, 20)
+
 
 if __name__ == "__main__":
     unittest.main()
