@@ -1,6 +1,5 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@config "../tailwind.config.js";
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -29,21 +28,21 @@
     box-shadow: 0 4px 20px rgba(0,0,0,0.3);
   }
   .badge { @apply px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider; animation: scale-in 0.2s ease-out; }
-  .badge-green { @apply badge bg-success/15 text-success; }
-  .badge-yellow { @apply badge bg-warning/15 text-warning; }
-  .badge-red { @apply badge bg-danger/15 text-danger; }
-  .badge-blue { @apply badge bg-info/15 text-info; }
-  .badge-purple { @apply badge bg-accent/15 text-accent-light; }
+  .badge-green { @apply px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-success/15 text-success; animation: scale-in 0.2s ease-out; }
+  .badge-yellow { @apply px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-warning/15 text-warning; animation: scale-in 0.2s ease-out; }
+  .badge-red { @apply px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-danger/15 text-danger; animation: scale-in 0.2s ease-out; }
+  .badge-blue { @apply px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-info/15 text-info; animation: scale-in 0.2s ease-out; }
+  .badge-purple { @apply px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-accent/15 text-accent-light; animation: scale-in 0.2s ease-out; }
   .btn {
     @apply px-3 py-1.5 rounded-lg text-xs font-semibold inline-flex items-center gap-1.5 cursor-pointer border-0;
     transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
   }
   .btn:active { transform: scale(0.97); }
-  .btn-primary { @apply btn bg-accent text-white hover:bg-accent-light; }
-  .btn-ghost { @apply btn bg-transparent text-dark-200 border border-dark-600 hover:bg-dark-600/50 hover:text-dark-50 hover:border-dark-500; }
-  .btn-success { @apply btn bg-success text-white hover:opacity-85; }
-  .btn-warning { @apply btn bg-warning text-dark-900 hover:opacity-85; }
-  .btn-danger { @apply btn bg-danger text-white hover:opacity-85; }
+  .btn-primary { @apply px-3 py-1.5 rounded-lg text-xs font-semibold inline-flex items-center gap-1.5 cursor-pointer border-0 bg-accent text-white hover:bg-accent-light; transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1); }
+  .btn-ghost { @apply px-3 py-1.5 rounded-lg text-xs font-semibold inline-flex items-center gap-1.5 cursor-pointer bg-transparent text-dark-200 border border-dark-600 hover:bg-dark-600/50 hover:text-dark-50 hover:border-dark-500; transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1); }
+  .btn-success { @apply px-3 py-1.5 rounded-lg text-xs font-semibold inline-flex items-center gap-1.5 cursor-pointer border-0 bg-success text-white hover:opacity-85; transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1); }
+  .btn-warning { @apply px-3 py-1.5 rounded-lg text-xs font-semibold inline-flex items-center gap-1.5 cursor-pointer border-0 bg-warning text-dark-900 hover:opacity-85; transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1); }
+  .btn-danger { @apply px-3 py-1.5 rounded-lg text-xs font-semibold inline-flex items-center gap-1.5 cursor-pointer border-0 bg-danger text-white hover:opacity-85; transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1); }
   .input {
     @apply w-full px-3 py-2 bg-dark-900/80 border border-dark-600/50 rounded-lg text-dark-50 text-xs outline-none;
     transition: all 0.2s ease;
@@ -56,7 +55,9 @@
     background: linear-gradient(90deg, var(--tw-gradient-from, #6c5ce7), var(--tw-gradient-to, #a29bfe));
   }
   .stat-card {
-    @apply card relative overflow-hidden;
+    @apply bg-dark-700/80 border border-dark-600/50 rounded-xl p-4 backdrop-blur-sm relative overflow-hidden;
+    animation: fadeIn 0.3s ease-out;
+    transition: all 0.2s ease;
   }
   .stat-card::before {
     content: '';
